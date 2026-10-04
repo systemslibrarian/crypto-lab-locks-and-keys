@@ -1,0 +1,125 @@
+{
+  "$comment": [
+    "Mutations as CONCRETE PATCHES, per §4.1c of the catalog's _MASTER-TEMPLATE.md.",
+    "",
+    "A sentence describing a mutation cannot be replayed, and a paragraph describing",
+    "a run is the author's side of the claim rather than the run's. So each entry",
+    "below is a list of patches, and each patch names a file, an anchor that must",
+    "occur EXACTLY ONCE in it, and the text that replaces it. `npm run mutations`",
+    "applies them one mutation at a time and writes LEDGER.json and LEDGER.md",
+    "itself; no `observed` value in either file is typed by a person.",
+    "",
+    "The five entries are the three the build brief names - a decryption that always",
+    "returns the plaintext, a verification that always accepts, and the wrong-key",
+    "path silently reusing the right key - plus the two §4.1d requires of any",
+    "negative claim: delete the claim text and the assertion that it is on screen",
+    "must fail; break a check inside the fixture and the assertion that everything",
+    "is green must fail.",
+    "",
+    "Every patch is chosen to COMPILE. A patch that does not build is recorded as",
+    "DOES NOT BUILD and is never a kill, because the suite would then run against",
+    "the last good bundle and pass having proved nothing."
+  ],
+  "mutations": [
+    {
+      "id": "M1-decrypt-always-returns-plaintext",
+      "verdict": "wrong-key",
+      "what": "`open()` ignores the key it is handed and returns whatever `close()` last locked, so any private key appears to open the lock.",
+      "why": "This is the mutation a round-trip test cannot see, which is why the brief names it. Encrypt-then-decrypt still returns the message; Step 3's OPENED verdict is unchanged; the claims test that checks the recovered note still passes. What breaks is the REFUSAL, which is the only thing a lock actually promises. The unit suite's cross-pair rejection catches it too, and that redundancy is deliberate - the browser verdict and the algorithmic test are two independent witnesses to the same property.",
+      "patches": [
+        {
+          "file": "src/crypto/lock.ts",
+          "anchor": "/** Why a message cannot be locked, in the reader's words. Null means it can. */",
+          "replacement": "/* MUTATION M1: the last plaintext locked, handed back by open() regardless. */\nlet MUTANT_PLAINTEXT = '';\n\n/** Why a message cannot be locked, in the reader's words. Null means it can. */"
+        },
+        {
+          "file": "src/crypto/lock.ts",
+          "anchor": "  const refusal = whyNotLockable(text);\n  if (refusal) throw new Error(refusal);\n  const bytes = new Uint8Array(",
+          "replacement": "  const refusal = whyNotLockable(text);\n  if (refusal) throw new Error(refusal);\n  MUTANT_PLAINTEXT = text;\n  const bytes = new Uint8Array("
+        },
+        {
+          "file": "src/crypto/lock.ts",
+          "anchor": "  return attempt(\n    async () =>\n      new TextDecoder('utf-8', { fatal: true }).decode(\n        await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, openWith, locked)\n      ),\n    'This key does not open that lock.'\n  );",
+          "replacement": "  void openWith;\n  void locked;\n  return attempt(async () => MUTANT_PLAINTEXT, 'This key does not open that lock.');"
+        }
+      ],
+      "owningTest": "Step 3 wrong key is refused CALMLY, and the page names the cause",
+      "marker": "wrong-key",
+      "project": "claims",
+      "expectOnPage": "OPENED WITH THE WRONG KEY, in the alarm tone - the one state on this page that earns an alarm, because something that had to fail did not."
+    },
+    {
+      "id": "M2-verify-always-accepts",
+      "verdict": "checked",
+      "what": "`check()` runs the real verification and then discards its answer, returning true.",
+      "why": "Every signing round-trip stays green - a real signature still verifies - and so does Step 4's VERIFIED verdict. What breaks is the tamper path: one character changed and the check accepts it anyway. The page is built to paint that as an alarm rather than a pass, so the mutation is visible in the verdict tone as well as in the headline.",
+      "patches": [
+        {
+          "file": "src/crypto/sign.ts",
+          "anchor": "  return attempt(\n    () =>\n      crypto.subtle.verify(\n        { name: 'RSA-PSS', saltLength: SALT_BYTES },\n        checkWith,\n        signature,\n        new TextEncoder().encode(text)\n      ),",
+          "replacement": "  return attempt(\n    () =>\n      crypto.subtle\n        .verify(\n          { name: 'RSA-PSS', saltLength: SALT_BYTES },\n          checkWith,\n          signature,\n          new TextEncoder().encode(text)\n        )\n        .then(() => true),"
+        }
+      ],
+      "owningTest": "Step 4 refuses a text that changed by one character, and says which",
+      "marker": "checked",
+      "project": "claims",
+      "expectOnPage": "VERIFIED THE TAMPERED TEXT, in the alarm tone."
+    },
+    {
+      "id": "M3-wrong-key-path-reuses-right-key",
+      "verdict": "wrong-key",
+      "what": "Step 3's wrong-key button generates a second pair, prints its genuinely different fingerprint, and then opens the lock with the READER'S OWN private half.",
+      "why": "The subtlest of the three and the one a careless implementation really produces, because nothing about it looks wrong: a fresh pair IS generated, so the two fingerprints on screen genuinely differ and the panel reads exactly as intended. Only the key handed to `open` is the wrong one. Every unit test stays green - this is a UI wiring defect, not a cryptographic one - so the browser verdict is the only witness.",
+      "patches": [
+        {
+          "file": "src/ui/step3.ts",
+          "anchor": "export interface Step3Hooks {",
+          "replacement": "/* MUTATION M3: hands back the reader's own pair where the second one belongs. */\nfunction pairForWrongKeyPath(): NonNullable<typeof state.pair> {\n  return state.pair!;\n}\n\nexport interface Step3Hooks {"
+        },
+        {
+          "file": "src/ui/step3.ts",
+          "anchor": "      state.otherPair = await makePair();\n      const result = await open(state.otherPair.openWith, locked.bytes);",
+          "replacement": "      state.otherPair = await makePair();\n      const result = await open(pairForWrongKeyPath().openWith, locked.bytes);"
+        }
+      ],
+      "owningTest": "Step 3 wrong key is refused CALMLY, and the page names the cause",
+      "marker": "wrong-key",
+      "project": "claims",
+      "expectOnPage": "OPENED WITH THE WRONG KEY, in the alarm tone, beside two fingerprints that really are different."
+    },
+    {
+      "id": "M4-negative-claim-text-deleted",
+      "verdict": "unattributed",
+      "what": "The negative-claim sentence is emptied, so the fixture renders with no statement of the limitation it exists to demonstrate.",
+      "why": "§4.1d requires exactly this check: delete the negative-claim text and the assertion that it is on screen must fail. Note what does NOT break - the fixture still reaches its state, every verdict is still green, and the verdict still reads OPENED - AND UNATTRIBUTED - so nothing but the claim assertion can catch it. A negative-claim test that survives its own text being deleted is decorative.",
+      "patches": [
+        {
+          "file": "src/ui/step3.ts",
+          "anchor": "export const NEGATIVE_CLAIM =\n  'A lock that opens does not tell you who closed it. RSA-OAEP decryption ' +\n  'establishes nothing at all about the sender: anyone holding the public half ' +\n  'can produce a block this private half opens, and the block carries no record ' +\n  'of who made it.';",
+          "replacement": "export const NEGATIVE_CLAIM = '';"
+        }
+      ],
+      "owningTest": "every check passes, and the message is unattributed anyway",
+      "marker": "unattributed",
+      "project": "claims",
+      "expectOnPage": "The fixture state exactly as it ships, minus the one sentence that makes it a result rather than a curiosity."
+    },
+    {
+      "id": "M5-fixture-check-broken",
+      "verdict": "unattributed",
+      "what": "The stranger's block is opened with a freshly generated private half instead of the reader's, so the fixture's own decryption fails.",
+      "why": "The other half of what §4.1d requires: break a check inside the fixture and the assertion that everything is green must fail. The page then renders THE FIXTURE DID NOT HOLD, which is the honest outcome - a fixture whose own checks fail is demonstrating the mechanism working rather than its limit, and must never be allowed to read as a demonstration of the limitation.",
+      "patches": [
+        {
+          "file": "src/ui/step3.ts",
+          "anchor": "      state.fromStranger = await close(strangerHandle, state.strangerText);\n      const result = await open(pair.openWith, state.fromStranger.bytes);",
+          "replacement": "      state.fromStranger = await close(strangerHandle, state.strangerText);\n      const result = await open((await makePair()).openWith, state.fromStranger.bytes);"
+        }
+      ],
+      "owningTest": "every check passes, and the message is unattributed anyway",
+      "marker": "unattributed",
+      "project": "claims",
+      "expectOnPage": "THE FIXTURE DID NOT HOLD, in the alarm tone, with no recovered text and no negative claim."
+    }
+  ]
+}
