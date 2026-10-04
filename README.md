@@ -296,8 +296,8 @@ assertion that it is on screen must fail; break a check inside the fixture and t
 that everything is green must fail. A negative-claim test that survives both is decorative.
 
 The ledger is **enforced, not archived**. Each claims test records the (test, marker) pair it
-actually asserted, and `e2e/global-teardown.ts` fails any full claims run in which a recorded
-kill names a pair that never executed — so a kill can only stay recorded while the assertion
+actually asserted, and an `afterAll` in that spec fails any full claims run in which a recorded
+kill's own test ran without asserting the marker the record names — so a kill can only stay recorded while the assertion
 that produced it still exists. That enforcement was itself verified by corrupting one ledger
 entry and confirming the run failed with all 16 tests passing.
 

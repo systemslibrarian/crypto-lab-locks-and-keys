@@ -60,7 +60,7 @@
           "replacement": "  return attempt(\n    () =>\n      crypto.subtle\n        .verify(\n          { name: 'RSA-PSS', saltLength: SALT_BYTES },\n          checkWith,\n          signature,\n          new TextEncoder().encode(text)\n        )\n        .then(() => true),"
         }
       ],
-      "owningTest": "Step 4 refuses a text that changed by one character, and says which",
+      "owningTest": "Step 4 refuses an edited note, marks the change, and reports it honestly",
       "marker": "checked",
       "project": "claims",
       "expectOnPage": "VERIFIED THE TAMPERED TEXT, in the alarm tone."

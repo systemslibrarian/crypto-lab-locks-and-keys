@@ -83,7 +83,7 @@ jobs:
       # Both browser suites, and both are gates. The a11y spec drives every state
       # at 1280/390/320; the claims spec checks what the page SAYS and what it
       # declares it does NOT promise (§4.1b, §4.1d). The claims run also enforces
-      # the mutation ledger -- see e2e/global-teardown.ts.
+      # the mutation ledger -- see e2e/evidence.ts.
       - name: Accessibility gate (axe-core, WCAG A/AA, at 1280 / 390 / 320)
         run: npm run test:a11y
 
