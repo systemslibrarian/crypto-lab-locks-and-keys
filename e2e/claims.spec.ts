@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import { boot } from './gate';
-import { witness } from './evidence';
+import { enforceLedger, ran, witness } from './evidence';
 
 /**
  * The claims suite: what this lab's interface SAYS, as opposed to what it is
@@ -40,6 +40,25 @@ import { witness } from './evidence';
  * Every test that asserts a verdict marker calls `witness()`, which is what
  * makes the mutation ledger enforceable rather than archival. See `evidence.ts`.
  */
+
+/*
+ * The mutation ledger is enforced from HERE, not from a `globalTeardown`.
+ *
+ * `afterEach` records that a test executed, whatever its outcome; `afterAll`
+ * then fails the run if a recorded kill's own test ran without asserting the
+ * marker the record names. Both hooks are root-level, so they cover every test
+ * in this file regardless of declaration order.
+ *
+ * It lived in a `globalTeardown` first, and that was wrong: the teardown asked
+ * whether `claims` was in `config.projects` to decide whether this suite had
+ * run, and Playwright passes the FULL project list whatever `--project` was
+ * given. So an a11y-only run enforced this ledger, found no witnesses, and
+ * failed the ACCESSIBILITY GATE with all three of its tests passing — a red step
+ * naming the wrong subject, which is exactly what §4.1a exists to prevent. See
+ * `evidence.ts` for the whole account.
+ */
+test.afterEach(({}, testInfo) => ran(testInfo.title));
+test.afterAll(() => enforceLedger());
 
 /** Decode the page's own base64 the way a reader's clipboard would. */
 const b64 = (s: string): Buffer => Buffer.from(s, 'base64');

@@ -29,9 +29,6 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'list' : [['list'], ['html', { open: 'never' }]],
-  // Fails the run if the mutation ledger records a kill whose (test, marker)
-  // pair never actually executed. See e2e/global-teardown.ts.
-  globalTeardown: './e2e/global-teardown.ts',
   use: {
     baseURL: BASE,
     colorScheme: 'dark', // dark is the only theme

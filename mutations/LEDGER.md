@@ -7,7 +7,7 @@ The records are also enforced rather than archived: `e2e/global-teardown.ts` fai
 full claims run in which a kill recorded here names a (test, marker) pair that did not
 execute, so a kill can only stay recorded while the assertion that produced it exists.
 
-Generated 2026-10-04T21:05:43.802Z.
+Generated 2026-10-04T21:20:25.984Z.
 
 ## A kill is defined by four rules, and the script enforces all four
 
