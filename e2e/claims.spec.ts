@@ -738,6 +738,31 @@ test.describe('the negative claim: a note that opens does not say who sent it', 
   });
 });
 
+test.describe('the signing-role question, kept and scoped', () => {
+  test('names the halves, and does not call separate signing keys a mistake', async ({ page }) => {
+    await boot(page, 'dark');
+    // It ships shut, like every disclosure here, so a reader opens it first and
+    // so does this test. Clicking into a closed <details> would time out on
+    // visibility rather than on the assertion, which reads as a broken page.
+    await page.locator('details', { has: page.getByText(/which half did which job/) })
+      .locator('> summary')
+      .click();
+    const wrong = page.locator('#check-roles .check-opt', { hasText: 'A separate signing key' });
+    await wrong.click();
+    const result = page.locator('#check-roles .check-result');
+    await expect(result).toHaveClass(/pill-bad/);
+    // Scoped to what THIS demo generated. Separate signing and encryption keys
+    // are normal practice, so the distractor must be wrong about this page
+    // without being wrong about the world.
+    await expect(result).toContainText('This demo generated exactly ONE pair');
+    await expect(result).toContainText('real systems often DO keep separate keys');
+
+    await page.locator('#check-roles .check-opt').first().click();
+    await expect(result).toHaveClass(/pill-ok/);
+    await expect(result).toContainText('The half you keep is the half that signs');
+  });
+});
+
 test.describe('the recap says what each job does not establish', () => {
   test('every row names a key and a limit', async ({ page }) => {
     await boot(page, 'dark');

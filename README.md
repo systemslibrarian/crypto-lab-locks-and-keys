@@ -29,10 +29,13 @@ no storage — the only thing this page writes to `localStorage` is the theme pi
 page destroys the key pair.
 
 **Not production crypto — a teaching demo.** One specific thing here is deliberately not what
-a real system does: the private half is generated `extractable: true`, because Step 4 proves
-the signing pair is the *same* pair by exporting the public half from two different key handles
-and comparing the bytes. A real system marks a private key non-extractable and never exports
-it. The page says so in its own words, not just here.
+a careful system would do: the private half is generated `extractable: true`. That is needed
+because WebCrypto binds a key to an algorithm, so the private half has to be exported as PKCS#8
+and re-imported under `RSA-PSS` for Step 4 to use one pair for both jobs. (The *public*-half
+comparison Step 4 shows a reader needs no private export at all.) A system handling real keys
+would normally mark them non-extractable, and some deliberately do export them — to escrow or
+back up a key, for instance — so this is a precaution a design can trade away knowingly, not a
+rule the maths imposes. The page says as much in its own words, not just here.
 
 ### What it does NOT prove
 
@@ -214,7 +217,7 @@ catalog's `tools/playwright-ports.json`.
 
 ## Build & Verify
 
-**30 unit tests** (4 files) + **27 claims tests** + **3 accessibility drives**.
+**30 unit tests** (4 files) + **28 claims tests** + **3 accessibility drives**.
 
 **Correctness, in two independent halves.** A freshly generated key pair has no published answer
 to compare against, so:

@@ -389,8 +389,14 @@ export async function boot(page: Page, theme: 'dark'): Promise<void> {
 
   // ── Disclosures ship shut ───────────────────────────────────────────────
   await expect(page.locator('details[open]')).toHaveCount(0);
-  // The on-ramp disclosure, three predictions, and the pinned case list.
-  await expect(page.locator('details')).toHaveCount(5);
+  // The on-ramp disclosure, three predictions, the signing-role check, and the
+  // pinned case list.
+  await expect(page.locator('details')).toHaveCount(6);
+  // The role check is rendered on arrival even though it reads as a Step 4
+  // afterthought: a question whose options only appear once you have answered
+  // the step is a question nobody meets.
+  await expect(page.locator('#check-roles .check-opt')).toHaveCount(3);
+  await expect(page.locator('#check-roles .check-result')).toBeEmpty();
 
   // ── The pinned run finishes, because nothing awaits it ──────────────────
   await expect(page.locator('#pinned-out [data-verdict="pinned"]')).toBeVisible();
@@ -1004,6 +1010,17 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await checker.fill(`${signedText} and bring the money.`);
   await press(page, 'Check the signature', 'checked', 'held');
   await scanAt('Step 4: a hand-typed tamper — several marked graphemes');
+
+  // The signing-role check, which is the one question aimed at the misconception
+  // this whole step exists to correct.
+  await reveal(page, /which half did which job/);
+  await page.locator('#check-roles .check-opt').nth(1).click();
+  await expect(page.locator('#check-roles .check-result')).toHaveClass(/pill-bad/);
+  await scanAt('Step 4: the signing-role check answered wrong');
+
+  await page.locator('#check-roles .check-opt').first().click();
+  await expect(page.locator('#check-roles .check-result')).toHaveClass(/pill-ok/);
+  await scanAt('Step 4: the signing-role check answered right');
 
   // ── The recap and the closing questions ─────────────────────────────────
   await page.locator('#scenario-1 .check-opt').nth(1).click();

@@ -42,6 +42,11 @@
 
 html {
   background-color: var(--bg); /* longhand — axe/WebKit miss the shorthand */
+  /* The top bar is `position: sticky`, so an in-page jump (#step-4 from Step 3's
+     hand-off, #recap from Step 4's) lands its target UNDER the bar and the
+     heading a reader was sent to read is the one thing hidden. Reserving the
+     bar's height plus a little air fixes every anchor on the page at once. */
+  scroll-padding-top: 5rem;
 }
 
 body {

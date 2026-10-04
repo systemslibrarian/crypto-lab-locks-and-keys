@@ -7,7 +7,7 @@ The records are also enforced rather than archived: an `afterAll` in `e2e/claims
 fails any full claims run in which a kill recorded here names a test that ran WITHOUT
 asserting its marker, so a kill can only stay recorded while its assertion still exists.
 
-Generated 2026-10-04T22:37:47.350Z.
+Generated 2026-10-04T22:55:55.450Z.
 
 ## A kill is defined by four rules, and the script enforces all four
 
@@ -16,17 +16,17 @@ Generated 2026-10-04T22:37:47.350Z.
 3. the run served the MUTATED code (bundle hash moved, and the red run is not a build or server failure)
 4. a patch that does not compile is DOES NOT BUILD and is never a kill
 
-Unmutated bundle `5ecf81a27aae278b`; restored bundle `5ecf81a27aae278b` (matches).
+Unmutated bundle `42fff7a6c71ed982`; restored bundle `42fff7a6c71ed982` (matches).
 
 ## Results
 
 | Mutation | Verdict | Outcome | Bundle moved | Owning test |
 |---|---|---|---|---|
-| `M1-decrypt-always-returns-plaintext` | `wrong-key` | **KILLED** | 5ecf81a27aae278b → e2e3df926d6db82c | Step 3 wrong key is refused CALMLY, and the page names the cause |
-| `M2-verify-always-accepts` | `checked` | **KILLED** | 5ecf81a27aae278b → 7f91df22b0e2ef66 | Step 4 refuses an edited note, marks the change, and reports it honestly |
-| `M3-wrong-key-path-reuses-right-key` | `wrong-key` | **KILLED** | 5ecf81a27aae278b → 768ee316ae00c6da | Step 3 wrong key is refused CALMLY, and the page names the cause |
-| `M4-negative-claim-text-deleted` | `unattributed` | **KILLED** | 5ecf81a27aae278b → eb232fa3ea4e4393 | every check passes, and the message is unattributed anyway |
-| `M5-fixture-check-broken` | `unattributed` | **KILLED** | 5ecf81a27aae278b → afb2454dd3f1e8dd | every check passes, and the message is unattributed anyway |
+| `M1-decrypt-always-returns-plaintext` | `wrong-key` | **KILLED** | 42fff7a6c71ed982 → 18b8df9ac791c523 | Step 3 wrong key is refused CALMLY, and the page names the cause |
+| `M2-verify-always-accepts` | `checked` | **KILLED** | 42fff7a6c71ed982 → 3bf78b7616cfd98d | Step 4 refuses an edited note, marks the change, and reports it honestly |
+| `M3-wrong-key-path-reuses-right-key` | `wrong-key` | **KILLED** | 42fff7a6c71ed982 → 25b2081dd3c888e9 | Step 3 wrong key is refused CALMLY, and the page names the cause |
+| `M4-negative-claim-text-deleted` | `unattributed` | **KILLED** | 42fff7a6c71ed982 → 13e2b817da43092c | every check passes, and the message is unattributed anyway |
+| `M5-fixture-check-broken` | `unattributed` | **KILLED** | 42fff7a6c71ed982 → b65f621e6fa1554b | every check passes, and the message is unattributed anyway |
 
 ## Each mutation in full
 
@@ -42,7 +42,7 @@ Unmutated bundle `5ecf81a27aae278b`; restored bundle `5ecf81a27aae278b` (matches
 
 **Owning test.** `Step 3 wrong key is refused CALMLY, and the page names the cause` — asserts the `wrong-key` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 5ecf81a27aae278b → e2e3df926d6db82c.
+**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 18b8df9ac791c523.
 
 ```
 Error: expect(locator).toHaveText(expected) failed
@@ -65,7 +65,7 @@ Call log:
 
 **Owning test.** `Step 4 refuses an edited note, marks the change, and reports it honestly` — asserts the `checked` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 5ecf81a27aae278b → 7f91df22b0e2ef66.
+**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 3bf78b7616cfd98d.
 
 ```
 Error: expect(locator).toHaveText(expected) failed
@@ -88,7 +88,7 @@ Call log:
 
 **Owning test.** `Step 3 wrong key is refused CALMLY, and the page names the cause` — asserts the `wrong-key` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 5ecf81a27aae278b → 768ee316ae00c6da.
+**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 25b2081dd3c888e9.
 
 ```
 Error: expect(locator).toHaveText(expected) failed
@@ -111,7 +111,7 @@ Call log:
 
 **Owning test.** `every check passes, and the message is unattributed anyway` — asserts the `unattributed` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 5ecf81a27aae278b → eb232fa3ea4e4393.
+**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 13e2b817da43092c.
 
 ```
 Error: expect(locator).toContainText(expected) failed
@@ -134,7 +134,7 @@ Call log:
 
 **Owning test.** `every check passes, and the message is unattributed anyway` — asserts the `unattributed` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 5ecf81a27aae278b → afb2454dd3f1e8dd.
+**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → b65f621e6fa1554b.
 
 ```
 Error: expect(locator).toHaveText(expected) failed

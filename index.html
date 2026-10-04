@@ -227,6 +227,14 @@
         </details>
       </section>
 
+      <noscript>
+        <p class="unavailable">
+          This page needs JavaScript: the key pair, the encryption and the signature are all
+          computed in your browser, so with scripting off there is nothing to show. Nothing is
+          sent anywhere either way — there is no server doing this.
+        </p>
+      </noscript>
+
       <p id="unavailable" class="unavailable" role="alert" hidden>
         This browser is not giving the page access to WebCrypto, so none of the steps below can
         run. That usually means the page was opened over plain <code>http://</code> rather than
@@ -383,6 +391,11 @@
             </button>
           </div>
           <div id="s4-check-out" class="out" role="status" aria-live="polite"></div>
+
+          <details class="learner-check">
+            <summary>Quick check — which half did which job?</summary>
+            <div id="check-roles" class="check-body"></div>
+          </details>
           <p id="s4-next" class="next-step" hidden></p>
         </section>
 

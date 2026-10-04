@@ -105,6 +105,36 @@ const QUESTIONS: readonly Question[] = [
     ],
   },
   {
+    host: 'check-roles',
+    prompt: 'You just signed a note and verified it. Which half did each job?',
+    options: [
+      {
+        label: 'The private half signed; the public half verified',
+        correct: true,
+        because:
+          'Right. The half you keep is the half that signs — which is what makes a signature ' +
+          'worth anything, since nobody else has it. The half you publish is the half that ' +
+          'checks, which is why anybody can check.',
+      },
+      {
+        label: 'A separate signing key, generated for this step',
+        correct: false,
+        because:
+          'Not here. This demo generated exactly ONE pair, in Step 1, and the SAME PAIR box ' +
+          'above proves it by exporting the public half from both handles. Worth knowing, ' +
+          'though: real systems often DO keep separate keys for signing and encryption, on ' +
+          'purpose. That is a choice about key management, not something the maths requires.',
+      },
+      {
+        label: 'The public half signed; the private half verified',
+        correct: false,
+        because:
+          'The other way round. If the public half could sign, everybody could sign as you — ' +
+          'and if checking needed the private half, nobody but you could check.',
+      },
+    ],
+  },
+  {
     host: 'scenario-1',
     prompt: 'A friend wants to send you a private note. Which half do you give them?',
     options: [
