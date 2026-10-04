@@ -118,9 +118,46 @@ body {
 .intro p:last-child {
   margin-bottom: 0;
 }
-.intro-honest {
+.intro-lead {
+  font-size: 1.02rem;
+}
+.intro-safety {
   color: var(--text-dim);
   font-size: 0.95rem;
+}
+/* The on-ramp is deliberately short. It was 493 words, which put the first
+   button 1.3 screens down at 1280px and 3.3 screens down at 320px -- a
+   beginner lab whose first action is below three screens of prose. The depth
+   did not go away; it moved in here. */
+.intro-more {
+  margin: 0.9rem 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface-2);
+  padding: 0.5rem 0.8rem;
+}
+.intro-more > summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.93rem;
+  padding: 0.2rem 0;
+}
+.intro-more-body p {
+  font-size: 0.93rem;
+  color: var(--text-dim);
+  margin: 0.5rem 0 0;
+}
+
+/* An environment with no WebCrypto. Without this the four steps simply throw on
+   click and the page reads as broken rather than unavailable. */
+.unavailable {
+  margin: 0 0 1.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--bad) 50%, var(--border));
+  border-left: 3px solid var(--bad);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background-color: color-mix(in oklab, var(--bad) 12%, var(--surface));
+  max-width: 68ch;
 }
 
 /* ---------- the four steps ---------- */
@@ -659,6 +696,201 @@ textarea {
 }
 .footer-links {
   overflow-wrap: anywhere;
+}
+
+/* ---------- which half is shareable ---------- */
+/* Icon AND text AND colour, never colour alone (WCAG 1.4.1): the badge says
+   "Shareable" or "Stays with you" in words, so the boundary survives greyscale,
+   deuteranopia and a screen reader. */
+.half-badge {
+  display: inline-block;
+  margin: 0 0 0.45rem;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--control-border);
+}
+.half-badge-share {
+  color: var(--ok-text);
+  border-color: color-mix(in oklab, var(--ok) 60%, var(--control-border));
+  background-color: color-mix(in oklab, var(--ok) 14%, var(--surface-2));
+}
+.half-badge-keep {
+  color: var(--alarm-text);
+  border-color: color-mix(in oklab, var(--alarm) 60%, var(--control-border));
+  background-color: color-mix(in oklab, var(--alarm) 14%, var(--surface-2));
+}
+.job-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+}
+
+/* ---------- two ciphertexts, side by side ---------- */
+/* The comparison used to replace the only preview, which asked a beginner to
+   compare hex from memory. Both stay on screen and the page computes the
+   verdict for them. */
+.compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.7rem;
+  margin: 0.9rem 0 0;
+}
+.compare-col {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--bg);
+  padding: 0.55rem 0.7rem;
+  min-width: 0;
+}
+
+/* ---------- the editable checker copy ---------- */
+.checker {
+  margin: 0.9rem 0 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background-color: var(--surface-2);
+}
+.checker-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  max-width: 66ch;
+}
+
+/* The changed character, marked rather than described by its index. The word
+   "(changed)" rides along for anyone not seeing the highlight. */
+.diff-mark {
+  background-color: color-mix(in oklab, var(--alarm) 38%, var(--surface));
+  color: var(--text);
+  border-bottom: 2px solid var(--alarm);
+  padding: 0 0.1em;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* ---------- next step ---------- */
+.next-step {
+  margin: 1rem 0 0;
+}
+.next-step-link {
+  display: inline-block;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  background-color: var(--surface-2);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+#app .next-step-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.next-step-link:hover {
+  border-color: var(--accent-text);
+  background-color: color-mix(in oklab, var(--accent) 12%, var(--surface-2));
+}
+
+/* ---------- predictions, and the closing questions ---------- */
+.predict {
+  margin: 0 0 0.9rem;
+}
+.scenario {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface-2);
+}
+.scenario:last-child {
+  margin-bottom: 0;
+}
+.pill-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+.pill-ok .pill-head {
+  color: var(--ok-text);
+}
+.pill-bad .pill-head {
+  color: var(--alarm-text);
+}
+.pill-why {
+  display: block;
+  margin-top: 0.4rem;
+}
+
+/* ---------- the recap table ---------- */
+/* A table is the one shape here that may scroll sideways, so it gets the
+   keyboard route and the label WCAG 2.1.1 requires -- declared in the markup,
+   because a scroller born without them is invisible to axe. */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.recap-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.93rem;
+}
+.recap-table :is(th, td) {
+  text-align: left;
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.recap-table thead th {
+  background-color: var(--surface-2);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.recap-table tbody th {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.recap-table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+/* ---------- footer, as questions rather than slugs ---------- */
+.footer-next {
+  font-weight: 600;
+  color: var(--text);
+}
+ul.footer-links {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+/* Visually hidden, still announced. Used for the table caption and for the
+   "(changed)" marker beside a diff highlight. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ---------- reduced motion ---------- */

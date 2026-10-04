@@ -59,6 +59,23 @@ export const key = (): SVGElement =>
     'glyph-key'
   );
 
+/**
+ * A seal with a tick in it — a checked signature.
+ *
+ * Deliberately NOT the opening padlock. A lock springing open is the picture of
+ * a secret being read, and Step 4 exists to stop a reader believing a signature
+ * does that: a verified signature reveals nothing, hides nothing and unlocks
+ * nothing. Giving verification its own mark is part of teaching the difference.
+ */
+export const seal = (): SVGElement =>
+  shell(
+    [
+      { d: 'M12 3l2.4 1.8 3 .2.9 2.9 2.2 2.1-1.3 2.7.3 3-2.8 1.2-1.8 2.4-3-.5-2.9 1-1.9-2.3-2.9-.9.1-3L3 11.7l1.6-2.5.3-3 2.9-.6L10 3.3z' },
+      { d: 'M8.8 12.2l2.2 2.2 4.2-4.6' },
+    ],
+    'glyph-seal'
+  );
+
 /** A tick, for an outcome that is simply right. */
 export const tick = (): SVGElement => shell([{ d: 'M4 13l5 5L20 7' }], 'glyph-tick');
 

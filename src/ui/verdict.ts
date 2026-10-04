@@ -27,13 +27,13 @@
  * what `e2e/claims.spec.ts` asserts against and what `mutations/mutations.json`
  * names, so a mutation record points at a surface rather than at a sentence.
  */
-import { closedLock, cross, openLock, tick, warn } from './icons';
+import { closedLock, cross, openLock, seal, tick, warn } from './icons';
 import { el, fill } from './dom';
 
 export type Tone = 'pass' | 'held' | 'alarm' | 'fail';
 
 /** Which glyph belongs to which tone, with the lock states taking precedence. */
-export type Glyph = 'tick' | 'cross' | 'warn' | 'closed-lock' | 'open-lock';
+export type Glyph = 'tick' | 'cross' | 'warn' | 'closed-lock' | 'open-lock' | 'seal';
 
 const GLYPHS: Record<Glyph, () => SVGElement> = {
   tick,
@@ -41,6 +41,11 @@ const GLYPHS: Record<Glyph, () => SVGElement> = {
   warn,
   'closed-lock': closedLock,
   'open-lock': openLock,
+  // Verification gets its OWN mark rather than the opening padlock. A lock
+  // springing open is the picture of a secret being read, and reusing it for a
+  // signature check redraws exactly the confusion Step 4 exists to remove --
+  // a verified signature reveals nothing and unlocks nothing.
+  seal,
 };
 
 export interface VerdictSpec {
@@ -71,6 +76,15 @@ export interface Slot {
   readonly marker: string;
   readonly host: HTMLElement;
   readonly basis: () => string;
+  /**
+   * What to DO about it, named per slot.
+   *
+   * The notice used to read "Something this answer depended on has changed" for
+   * every marker, which is true, unhelpful, and the kind of sentence a beginner
+   * reads as an error. A reader who has just edited their note wants to be told
+   * "lock this version again", not to be informed that a dependency moved.
+   */
+  readonly nextAction: string;
 }
 
 interface Rendered {
@@ -83,8 +97,13 @@ const slots = new Map<string, Slot>();
 const rendered = new Map<string, Rendered>();
 
 /** Declare a verdict slot. Called once per marker, at panel build time. */
-export function slot(marker: string, host: HTMLElement, basis: () => string): Slot {
-  const s: Slot = { marker, host, basis };
+export function slot(
+  marker: string,
+  host: HTMLElement,
+  basis: () => string,
+  nextAction: string
+): Slot {
+  const s: Slot = { marker, host, basis, nextAction };
   slots.set(marker, s);
   return s;
 }
@@ -134,12 +153,9 @@ export function retireStale(): void {
       el('div', { class: 'verdict verdict-retired', 'data-verdict-retired': marker }, [
         el('p', { class: 'verdict-head' }, [
           GLYPHS.warn(),
-          el('span', { class: 'verdict-headline' }, ['RETIRED']),
+          el('span', { class: 'verdict-headline' }, ['OUT OF DATE']),
         ]),
-        el('p', { class: 'verdict-detail' }, [
-          'Something this answer depended on has changed, so it no longer describes ' +
-            'this page. Run the step again.',
-        ]),
+        el('p', { class: 'verdict-detail' }, [r.slot.nextAction]),
       ])
     );
     rendered.delete(marker);

@@ -1,11 +1,17 @@
 /*
- * The same pair, backwards — RSASSA-PSS (RFC 8017 §8.1) through WebCrypto.
+ * The pair's other job — RSASSA-PSS (RFC 8017 §8.1) through WebCrypto.
  *
- * Step 4's panel is built on one fact that newcomers reliably get wrong: signing
- * is not a different mechanism from the locking in Steps 2 and 3. It is the same
- * key pair with the halves swapping jobs. The private half, which was the only
- * thing that could OPEN a lock, is now the only thing that can MAKE a signature;
- * the public half, which could only CLOSE a lock, can now only CHECK one.
+ * Step 4's panel is built on one fact newcomers reliably get wrong: signing does
+ * not need a different key pair from the encryption in Steps 2 and 3. It is the
+ * same pair with the halves swapping roles. The private half, which was the only
+ * thing that could DECRYPT, is now the only thing that can SIGN; the public half,
+ * which could only ENCRYPT, can now only VERIFY.
+ *
+ * It is NOT the same operation run backwards, and this file deliberately does not
+ * say so. RSAES-OAEP and RSASSA-PSS are different constructions with different
+ * padding, and `verify` below does not decrypt a signature to recover a message —
+ * it hands the whole job to WebCrypto, which rebuilds an encoded block and checks
+ * its structure. See `src/ui/step4.ts` for why that distinction earned a rewrite.
  *
  * The keys passed in here are re-imported handles onto the pair made in pair.ts,
  * and `assertSamePair` has already proved they carry the same key. Nothing new is

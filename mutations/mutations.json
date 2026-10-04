@@ -1,6 +1,6 @@
 {
   "$comment": [
-    "Mutations as CONCRETE PATCHES, per §4.1c of the catalog's _MASTER-TEMPLATE.md.",
+    "Mutations as CONCRETE PATCHES, per \u00a74.1c of the catalog's _MASTER-TEMPLATE.md.",
     "",
     "A sentence describing a mutation cannot be replayed, and a paragraph describing",
     "a run is the author's side of the claim rather than the run's. So each entry",
@@ -11,7 +11,7 @@
     "",
     "The five entries are the three the build brief names - a decryption that always",
     "returns the plaintext, a verification that always accepts, and the wrong-key",
-    "path silently reusing the right key - plus the two §4.1d requires of any",
+    "path silently reusing the right key - plus the two \u00a74.1d requires of any",
     "negative claim: delete the claim text and the assertion that it is on screen",
     "must fail; break a check inside the fixture and the assertion that everything",
     "is green must fail.",
@@ -73,8 +73,8 @@
       "patches": [
         {
           "file": "src/ui/step3.ts",
-          "anchor": "export interface Step3Hooks {",
-          "replacement": "/* MUTATION M3: hands back the reader's own pair where the second one belongs. */\nfunction pairForWrongKeyPath(): NonNullable<typeof state.pair> {\n  return state.pair!;\n}\n\nexport interface Step3Hooks {"
+          "anchor": "export function mountStep3(): void {",
+          "replacement": "/* MUTATION M3: hands back the reader's own pair where the second one belongs. */\nfunction pairForWrongKeyPath(): NonNullable<typeof state.pair> {\n  return state.pair!;\n}\n\nexport function mountStep3(): void {"
         },
         {
           "file": "src/ui/step3.ts",
@@ -91,11 +91,11 @@
       "id": "M4-negative-claim-text-deleted",
       "verdict": "unattributed",
       "what": "The negative-claim sentence is emptied, so the fixture renders with no statement of the limitation it exists to demonstrate.",
-      "why": "§4.1d requires exactly this check: delete the negative-claim text and the assertion that it is on screen must fail. Note what does NOT break - the fixture still reaches its state, every verdict is still green, and the verdict still reads OPENED - AND UNATTRIBUTED - so nothing but the claim assertion can catch it. A negative-claim test that survives its own text being deleted is decorative.",
+      "why": "\u00a74.1d requires exactly this check: delete the negative-claim text and the assertion that it is on screen must fail. Note what does NOT break - the fixture still reaches its state, every verdict is still green, and the verdict still reads OPENED - AND UNATTRIBUTED - so nothing but the claim assertion can catch it. A negative-claim test that survives its own text being deleted is decorative.",
       "patches": [
         {
           "file": "src/ui/step3.ts",
-          "anchor": "export const NEGATIVE_CLAIM =\n  'A lock that opens does not tell you who closed it. RSA-OAEP decryption ' +\n  'establishes nothing at all about the sender: anyone holding the public half ' +\n  'can produce a block this private half opens, and the block carries no record ' +\n  'of who made it.';",
+          "anchor": "export const NEGATIVE_CLAIM =\n  'A note that opens does not tell you who sent it. RSA-OAEP decryption ' +\n  'establishes nothing at all about the sender: anyone holding the public half ' +\n  'can produce a block this private half opens, and the block carries no record ' +\n  'of who made it.';",
           "replacement": "export const NEGATIVE_CLAIM = '';"
         }
       ],
@@ -108,7 +108,7 @@
       "id": "M5-fixture-check-broken",
       "verdict": "unattributed",
       "what": "The stranger's block is opened with a freshly generated private half instead of the reader's, so the fixture's own decryption fails.",
-      "why": "The other half of what §4.1d requires: break a check inside the fixture and the assertion that everything is green must fail. The page then renders THE FIXTURE DID NOT HOLD, which is the honest outcome - a fixture whose own checks fail is demonstrating the mechanism working rather than its limit, and must never be allowed to read as a demonstration of the limitation.",
+      "why": "The other half of what \u00a74.1d requires: break a check inside the fixture and the assertion that everything is green must fail. The page then renders THE FIXTURE DID NOT HOLD, which is the honest outcome - a fixture whose own checks fail is demonstrating the mechanism working rather than its limit, and must never be allowed to read as a demonstration of the limitation.",
       "patches": [
         {
           "file": "src/ui/step3.ts",

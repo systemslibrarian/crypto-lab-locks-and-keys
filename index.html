@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Generates a real 2048-bit RSA key pair in the browser, encrypts a short message to the public half with RSA-OAEP and decrypts it with the private half, then uses the same pair in reverse to sign and verify with RSA-PSS."
+      content="Generates a real 2048-bit RSA key pair in the browser, encrypts a short message to the public half with RSA-OAEP and decrypts it with the private half, then uses the same pair for its other job, signing and verifying with RSA-PSS."
     />
 
     <!-- Social meta -->
@@ -23,7 +23,7 @@
     <meta property="og:title" content="Locks and Keys — crypto-lab" />
     <meta
       property="og:description"
-      content="A public key is a padlock anyone may close and only you can open — and running the same pair backwards is what a signature is. Real RSA-OAEP and RSA-PSS, no maths on screen."
+      content="A public key is a padlock anyone may close and only you can open — and the same pair has a second, different job: signing. Real RSA-OAEP and RSA-PSS, no maths on screen."
     />
     <meta
       property="og:url"
@@ -33,7 +33,7 @@
     <meta name="twitter:title" content="Locks and Keys — crypto-lab" />
     <meta
       name="twitter:description"
-      content="A public key is a padlock anyone may close and only you can open — and running the same pair backwards is what a signature is. Real RSA-OAEP and RSA-PSS, no maths on screen."
+      content="A public key is a padlock anyone may close and only you can open — and the same pair has a second, different job: signing. Real RSA-OAEP and RSA-PSS, no maths on screen."
     />
 
     <!-- Placeholder pending central assignment; see README "Pending central assignment". -->
@@ -172,160 +172,187 @@
           <h1 class="cl-hero-title">Locks and Keys</h1>
           <p class="cl-hero-sub">Public and private keys · RSA-OAEP · RSA-PSS</p>
           <p class="cl-hero-desc">
-            Make a real key pair, lock a short message to the public half, open it with the
-            private half, watch a different key fail — then run the same pair backwards to
-            sign and check a signature.
+            Make a real key pair, have a note encrypted to the half you hand out, open it with
+            the half you keep — then use the same pair for its other job, signing.
           </p>
         </div>
         <aside class="cl-hero-why" aria-label="Why it matters">
           <span class="cl-hero-why-label">WHY IT MATTERS</span>
           <p class="cl-hero-why-text">
-            Nearly everything private you do online rests on one idea: that you can publish
-            half of a key and keep the other half. Get that half-and-half backwards and you
-            either hand out the wrong thing or trust the wrong person. It is also the idea
-            behind signatures, which most people meet as a separate mystery and which is not
-            one.
+            Almost everything private you do online rests on one idea: that you can publish
+            half of a key and keep the other half. Get the halves the wrong way round and you
+            either hand out the wrong thing or trust the wrong person.
           </p>
         </aside>
       </div>
 
       <section class="intro" aria-labelledby="intro-head">
-        <h2 id="intro-head">Start here — what a public key is</h2>
-        <p>
-          Imagine a padlock that you can snap shut with your bare hands, and a key that is the
-          only thing in the world that opens it. Now make a thousand copies of the padlock and
-          leave them anywhere — on your desk, in a shop window, printed in a newspaper. Anyone
-          can take one, put a note in a box, and click the padlock shut. Nobody who does that
-          can open the box again, including them. Only you can, because only you have the key.
+        <h2 id="intro-head">Start here</h2>
+        <p class="intro-lead">
+          How can somebody send you a private note without the two of you first agreeing on a
+          password? You publish a <strong>public key</strong> anyone may encrypt to, and keep
+          the matching <strong>private key</strong> secret. Four steps, no maths.
         </p>
-        <p>
-          That is the whole idea. The padlock is called a <strong>public key</strong> and you
-          hand it out on purpose. The key is called a <strong>private key</strong> and you
-          never hand it to anybody. This page makes you a real pair and lets you try all of it,
-          including the part where you use the wrong key and nothing opens.
+        <p class="intro-safety">
+          Real cryptography, running in your browser. Use example text, not real secrets.
         </p>
-        <p>
-          Then it does the thing people find surprising: it uses the <em>same pair</em>
-          the other way round. The key that opens boxes can also make a mark that only the
-          matching padlock can check. That mark is a signature. It is not a second system.
-        </p>
-        <p class="intro-honest">
-          <strong>One honest note before you start.</strong> The padlock story is literally
-          true for the method on this page, RSA, which is why the lab uses it. Most of the web
-          today uses a different shape — elliptic curves — where encrypting to someone needs a
-          throwaway key pair and a key-derivation step first. It is better in practice and it
-          is one idea too many for the first time you meet this. When you want that, the fleet
-          has it: <a href="https://systemslibrarian.github.io/crypto-lab-iron-letter/" target="_blank" rel="noopener noreferrer">Iron Letter</a>
-          compares the curve shape against RSA directly, and
-          <a href="https://systemslibrarian.github.io/crypto-lab-hpke-envelope/" target="_blank" rel="noopener noreferrer">HPKE Envelope</a>
-          shows how it is actually packaged. If you want to know how the padlock works inside,
-          that is <a href="https://systemslibrarian.github.io/crypto-lab-rsa-educational/" target="_blank" rel="noopener noreferrer">Educational RSA</a>,
-          which exists to show exactly the layer this page keeps off the screen.
-        </p>
-        <p class="intro-honest">
-          Everything here runs real cryptography in your browser and nothing is simulated. It
-          is a teaching demo, not production code: the private half is made extractable so the
-          page can prove it is the same pair in Step 4, which a real system would never do.
-          Nothing is sent anywhere, nothing is stored, and reloading the page destroys the pair.
-        </p>
+        <details class="intro-more">
+          <summary>Why RSA here, and what this demo is not</summary>
+          <div class="intro-more-body">
+            <p>
+              The padlock story is <em>literally</em> true for RSA, which is why this lab uses
+              it: you encrypt straight to somebody's public key and there is nothing else on
+              screen. Most of the web today uses a different shape — elliptic curves — where
+              encrypting to someone needs a throwaway key pair and a key-derivation step
+              first. That is better in practice and one idea too many for a first encounter.
+              <a href="https://systemslibrarian.github.io/crypto-lab-iron-letter/" target="_blank" rel="noopener noreferrer">Iron Letter</a>
+              compares the two directly, and
+              <a href="https://systemslibrarian.github.io/crypto-lab-hpke-envelope/" target="_blank" rel="noopener noreferrer">HPKE Envelope</a>
+              shows how it is actually packaged.
+            </p>
+            <p>
+              Nothing here is simulated — every operation is the browser's own RSA. It is still
+              not production code. One deliberate difference: the private half is generated so
+              that it <em>can</em> be exported, which real systems avoid, because Step 4 needs
+              to re-import the same key material under a second algorithm name to show that one
+              pair does both jobs.
+            </p>
+            <p>
+              The numbers underneath — how the pair is generated and why it works — are kept off
+              this page on purpose. That is
+              <a href="https://systemslibrarian.github.io/crypto-lab-rsa-educational/" target="_blank" rel="noopener noreferrer">Educational RSA</a>,
+              which exists to show exactly the layer this one hides.
+            </p>
+          </div>
+        </details>
       </section>
+
+      <p id="unavailable" class="unavailable" role="alert" hidden>
+        This browser is not giving the page access to WebCrypto, so none of the steps below can
+        run. That usually means the page was opened over plain <code>http://</code> rather than
+        <code>https://</code>, or from a <code>file://</code> path. Open it at
+        <a href="https://systemslibrarian.github.io/crypto-lab-locks-and-keys/">the https address</a>
+        and it will work.
+      </p>
 
       <main>
         <section id="step-1" class="step" aria-labelledby="s1-head">
           <h2 id="s1-head"><span class="step-n">Step 1</span> Make a pair</h2>
           <p class="step-lede">
-            One button. Your browser generates two matching halves of one key pair — which is
-            real work, so it takes a moment.
+            You are Sam. Press the button; your browser generates two matching halves of one
+            real key pair.
           </p>
           <div class="controls">
             <button id="make-pair" type="button" class="btn btn-primary">Make a key pair</button>
           </div>
           <div id="s1-out" class="out" role="status" aria-live="polite"></div>
+          <p id="s1-next" class="next-step" hidden></p>
         </section>
 
         <section id="step-2" class="step" aria-labelledby="s2-head">
-          <h2 id="s2-head"><span class="step-n">Step 2</span> Close the lock</h2>
+          <h2 id="s2-head"><span class="step-n">Step 2</span> Encrypt a note to you</h2>
           <p class="step-lede">
-            Write a short note and close the lock on it with the <strong>public</strong> half —
-            the half you would have handed out. Watch what the private half does here: nothing.
+            Maya wants to send you something private. She has your <strong>public</strong> half
+            — the one you hand out — and nothing else. Write what she is sending and encrypt it.
           </p>
           <p class="gate-note" hidden></p>
           <div class="controls controls-stack">
-            <label class="field">
-              <span class="field-label">Your note</span>
-              <textarea
-                id="message"
-                rows="3"
-                spellcheck="false"
-              >Meet me at the north gate at six.</textarea>
+            <label class="field" for="message">
+              <span class="field-label">Maya’s note to you</span>
             </label>
+            <textarea
+              id="message"
+              rows="3"
+              spellcheck="false"
+              aria-describedby="msg-count limit-note"
+            >Meet me at the north gate at six.</textarea>
             <p id="msg-count" class="counter"></p>
-            <p class="limit-note">
-              A lock this size holds <strong data-max-bytes>190</strong> bytes, so this is a note
-              and not a letter. Real systems get around that by locking a key instead of a
-              message — that is what HPKE Envelope is about.
+            <p id="limit-note" class="limit-note">
+              A key this size encrypts at most <strong data-max-bytes>190</strong> bytes at a
+              time, so this is a note and not a letter. A byte is a unit of stored data; plain
+              letters take one each, an accented letter takes two and an emoji four, which is
+              why the counter can run ahead of the characters you typed. Real systems get around
+              the limit by encrypting a key rather than a message — that is what HPKE Envelope
+              is about.
             </p>
-            <button id="close-lock" type="button" class="btn btn-primary" data-gated>
-              Close the lock
-            </button>
+            <div class="controls">
+              <button id="close-lock" type="button" class="btn btn-primary" data-needs="pair">
+                Encrypt the note
+              </button>
+            </div>
           </div>
           <div id="s2-out" class="out" role="status" aria-live="polite"></div>
+          <p id="s2-next" class="next-step" hidden></p>
         </section>
 
         <section id="step-3" class="step" aria-labelledby="s3-head">
-          <h2 id="s3-head"><span class="step-n">Step 3</span> Open it</h2>
+          <h2 id="s3-head"><span class="step-n">Step 3</span> Open it — and see what opening proves</h2>
           <p class="step-lede">
-            Now the other half — and then two things that do not go the way you expect.
+            Three experiments. Guess before each one; being wrong is the fastest way to
+            remember it.
           </p>
           <p class="gate-note" hidden></p>
 
           <h3 class="sub-head">Open it with your private half</h3>
           <div class="controls">
-            <button id="open-lock" type="button" class="btn btn-primary" data-gated>
-              Open with my private half
+            <button id="open-lock" type="button" class="btn btn-primary" data-needs="lock">
+              Open it with my private half
             </button>
           </div>
           <div id="s3-out" class="out" role="status" aria-live="polite"></div>
 
           <h3 class="sub-head">Now try the wrong key</h3>
+          <details class="learner-check predict">
+            <summary>Predict first — optional</summary>
+            <div id="predict-wrong-key" class="check-body"></div>
+          </details>
           <p class="sub-lede">
             This makes a second, completely unrelated pair and hands its private half the same
-            locked bytes. It will not open them. That is not an error — it is the entire job of
-            a lock, and it is worth watching once.
+            encrypted bytes.
           </p>
           <div class="controls">
-            <button id="try-wrong-key" type="button" class="btn" data-gated>
+            <button id="try-wrong-key" type="button" class="btn" data-needs="lock">
               Try a different private key
             </button>
           </div>
           <div id="s3-wrong-out" class="out" role="status" aria-live="polite"></div>
 
           <h3 class="sub-head">And now the part nobody expects</h3>
+          <details class="learner-check predict">
+            <summary>Predict first — optional</summary>
+            <div id="predict-stranger" class="check-body"></div>
+          </details>
           <p class="sub-lede">
-            Your padlock is public. So let somebody else use it. This hands a stranger nothing
-            but the public bytes from Step 1 and lets them lock a message of their own choosing.
-            Then you open it with your private half.
+            Your public half is public, so let somebody else use it. This hands a stranger
+            nothing but your public bytes from Step 1 and lets them encrypt a note of their own
+            choosing. Then you open it with your private half.
           </p>
           <div class="controls">
-            <button id="stranger-lock" type="button" class="btn" data-gated>
+            <button id="stranger-lock" type="button" class="btn" data-needs="lock">
               Let a stranger use my public half
             </button>
           </div>
           <div id="s3-stranger-out" class="out" role="status" aria-live="polite"></div>
+          <p id="s3-next" class="next-step" hidden></p>
         </section>
 
         <section id="step-4" class="step" aria-labelledby="s4-head">
-          <h2 id="s4-head"><span class="step-n">Step 4</span> The same pair, backwards</h2>
+          <h2 id="s4-head"><span class="step-n">Step 4</span> The same pair, a different job</h2>
           <p class="step-lede">
-            Step 3 ended with a problem: a box that opens tells you nothing about who filled it.
-            This step is the answer, and it needs no new keys at all — the pair from Step 1 just
-            swaps jobs.
+            Step 3 ended with a problem: a note that opens tells you nothing about who sent it.
+            A signature is the answer — and it needs no new keys. Now you are the sender: you
+            sign, and Maya checks.
           </p>
           <p class="gate-note" hidden></p>
 
+          <details class="learner-check predict">
+            <summary>Predict first — optional</summary>
+            <div id="predict-sign" class="check-body"></div>
+          </details>
+
           <div class="controls">
-            <button id="sign-msg" type="button" class="btn btn-primary" data-gated>
-              Sign my note with the private half
+            <button id="sign-msg" type="button" class="btn btn-primary" data-needs="pair">
+              Sign the note with my private half
             </button>
           </div>
           <div id="s4-same-out" class="out" role="status" aria-live="polite"></div>
@@ -333,69 +360,92 @@
 
           <h3 class="sub-head">Check it with the public half</h3>
           <p class="sub-lede">
-            The check uses the public bytes and nothing else — re-imported from the same block
-            you could have printed in a newspaper.
+            Maya checks with your public bytes and nothing else — the same block you could have
+            printed in a newspaper. Then change the note she is checking and watch what happens:
+            edit the box yourself, or let the button change one character for you.
           </p>
+          <div id="checker-wrap" class="checker" hidden>
+            <label class="field" for="checker-text">
+              <span class="field-label">The note Maya is checking — edit it to tamper</span>
+            </label>
+            <textarea id="checker-text" rows="3" spellcheck="false"></textarea>
+            <p class="checker-note">
+              The signature and the signed note are untouched by this box. Editing it moves the
+              document underneath the signature, which is what tampering actually looks like.
+            </p>
+          </div>
           <div class="controls">
-            <button id="check-sig" type="button" class="btn btn-primary" data-gated>
+            <button id="check-sig" type="button" class="btn btn-primary" data-needs="signature">
               Check the signature
             </button>
-            <button id="tamper-msg" type="button" class="btn" data-gated>
-              Change one character and check again
+            <button id="tamper-msg" type="button" class="btn" data-needs="signature">
+              Change one character for me
             </button>
           </div>
           <div id="s4-check-out" class="out" role="status" aria-live="polite"></div>
+          <p id="s4-next" class="next-step" hidden></p>
+        </section>
 
-          <details class="learner-check">
-            <summary>Quick check — which half made the signature?</summary>
-            <div class="check-body">
-              <p class="check-q">
-                You just signed a note and checked it. Which half of the pair did each job?
-              </p>
-              <ul class="check-opts" role="list">
-                <li role="listitem">
-                  <button type="button" class="check-opt" data-correct="false">
-                    A separate signing key, made for the purpose
-                  </button>
-                </li>
-                <li role="listitem">
-                  <button type="button" class="check-opt" data-correct="true">
-                    The private half signed; the public half checked
-                  </button>
-                </li>
-                <li role="listitem">
-                  <button type="button" class="check-opt" data-correct="false">
-                    The public half signed; the private half checked
-                  </button>
-                </li>
-              </ul>
-              <p id="check-result" class="check-result" role="status" aria-live="polite"></p>
-            </div>
-          </details>
+        <section id="recap" class="step step-plain" aria-labelledby="recap-head">
+          <h2 id="recap-head">What each job does, and does not, establish</h2>
+          <div class="table-wrap" role="region" aria-label="Summary of the four jobs" tabindex="0">
+            <table class="recap-table">
+              <caption class="sr-only">
+                Which key each operation uses and what it does not establish
+              </caption>
+              <thead>
+                <tr><th scope="col">Job</th><th scope="col">Key used</th><th scope="col">What it does NOT establish</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Encrypt</th><td>The recipient’s public half</td><td>Who sent the note</td></tr>
+                <tr><th scope="row">Decrypt</th><td>The recipient’s private half</td><td>Who sent the note</td></tr>
+                <tr><th scope="row">Sign</th><td>The signer’s private half</td><td>Secrecy, or whether the note is true</td></tr>
+                <tr><th scope="row">Verify</th><td>The signer’s public half</td><td>Whose key it is, unless you already know</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="sub-head">Three questions</h3>
+          <p class="sub-lede">
+            No score, and nothing is recorded. If one of these is awkward, the explanation is
+            the point.
+          </p>
+          <div id="scenario-1" class="scenario"></div>
+          <div id="scenario-2" class="scenario"></div>
+          <div id="scenario-3" class="scenario"></div>
         </section>
 
         <section id="pinned-section" class="step step-plain" aria-labelledby="pinned-head">
-          <h2 id="pinned-head">Checked against somebody else's numbers</h2>
+          <h2 id="pinned-head">How this demo checks its own results</h2>
           <p class="step-lede">
-            Everything above is this page agreeing with itself, which is not worth much on its
-            own: a build that got the maths wrong in both directions at once would look exactly
-            as convincing. So the lab also runs a fixed set of cases published by somebody else,
-            in your browser, on arrival. If this section is not green, nothing else here should
-            be believed.
+            Everything above is this page agreeing with itself, which is not worth much alone: a
+            build that got the maths wrong in both directions at once would look just as
+            convincing. So the lab also runs a fixed set of cases published by somebody else, in
+            your browser, on arrival.
           </p>
           <div id="pinned-out" class="out" role="status" aria-live="polite"></div>
         </section>
       </main>
 
       <footer class="scripture-footer">
-        <p class="footer-links">
-          Related demos:
-          <a href="https://systemslibrarian.github.io/crypto-lab-rsa-educational/" target="_blank" rel="noopener noreferrer">crypto-lab-rsa-educational</a> ·
-          <a href="https://systemslibrarian.github.io/crypto-lab-iron-letter/" target="_blank" rel="noopener noreferrer">crypto-lab-iron-letter</a> ·
-          <a href="https://systemslibrarian.github.io/crypto-lab-hpke-envelope/" target="_blank" rel="noopener noreferrer">crypto-lab-hpke-envelope</a> ·
-          <a href="https://systemslibrarian.github.io/crypto-lab-ed25519-forge/" target="_blank" rel="noopener noreferrer">crypto-lab-ed25519-forge</a> ·
-          <a href="https://systemslibrarian.github.io/crypto-lab-hash-zoo/" target="_blank" rel="noopener noreferrer">crypto-lab-hash-zoo</a>
-        </p>
+        <p class="footer-next">Where to go next:</p>
+        <ul class="footer-links" role="list">
+          <li role="listitem">
+            <a href="https://systemslibrarian.github.io/crypto-lab-hpke-envelope/" target="_blank" rel="noopener noreferrer">How do real systems encrypt more than 190 bytes?</a>
+          </li>
+          <li role="listitem">
+            <a href="https://systemslibrarian.github.io/crypto-lab-rsa-educational/" target="_blank" rel="noopener noreferrer">How does RSA actually work inside?</a>
+          </li>
+          <li role="listitem">
+            <a href="https://systemslibrarian.github.io/crypto-lab-iron-letter/" target="_blank" rel="noopener noreferrer">Why do most systems use curves instead?</a>
+          </li>
+          <li role="listitem">
+            <a href="https://systemslibrarian.github.io/crypto-lab-ed25519-forge/" target="_blank" rel="noopener noreferrer">What else can signatures do?</a>
+          </li>
+          <li role="listitem">
+            <a href="https://crypto-lab.systemslibrarian.dev/" target="_blank" rel="noopener noreferrer">The rest of the Crypto Lab suite</a>
+          </li>
+        </ul>
         <p>So whether you eat or drink or whatever you do, do it all for the glory of God. — 1 Corinthians 10:31</p>
       </footer>
     </div>

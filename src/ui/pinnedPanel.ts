@@ -11,13 +11,13 @@
  */
 import { runPinned } from '../crypto/pinned';
 import { PINNED_CASE_COUNT, VECTOR_SOURCE } from '../crypto/vectors';
-import { el, p } from './dom';
+import { disclosure, el, p } from './dom';
 import { render, slot } from './verdict';
 
 export async function mountPinned(): Promise<void> {
   const host = document.getElementById('pinned-out') as HTMLElement;
   // The pinned set is fixed at build time, so nothing can retire this verdict.
-  slot('pinned', host, () => 'pinned');
+  slot('pinned', host, () => 'pinned', 'Reload the page to run the pinned cases again.');
 
   const run = await runPinned();
   const allAgreed = run.agreed === run.total && run.total === PINNED_CASE_COUNT;
@@ -50,9 +50,9 @@ export async function mountPinned(): Promise<void> {
           detail: [
             'Every pinned case from an outside publication came out the way that publication ' +
               'says it should, in this browser, just now.',
-            `${run.results.filter((r) => !r.mustSucceed).length} of them are cases the ` +
-              'construction is required to refuse, so a build that opened everything handed ' +
-              'to it would fail here.',
+            `${run.results.filter((r) => !r.mustSucceed).length} of the ${run.total} are cases ` +
+              'the construction is required to REFUSE, so a build that opened whatever it was ' +
+              'handed would fail here while passing every round-trip in the repository.',
           ],
         }
       : {
@@ -66,6 +66,11 @@ export async function mountPinned(): Promise<void> {
           ],
         },
     [
+      // The case list goes BEHIND a disclosure. Twelve rows read as a second
+      // lesson competing with the four steps, and a screen reader announcing
+      // all twelve at once in a live region is worse still -- the summary is
+      // the result, the rows are the evidence for anyone who wants it.
+      disclosure(`Show all ${run.total} cases`, [rows]),
       el('p', { class: 'source-line' }, [
         'Source: ',
         el('a', { href: VECTOR_SOURCE.url, target: '_blank', rel: 'noopener noreferrer' }, [
@@ -78,7 +83,12 @@ export async function mountPinned(): Promise<void> {
           'would implicate the code you just drove rather than a neighbouring setting.',
         'aside-note'
       ),
-      rows,
+      p(
+        'Passing these is evidence that the operations above behave as their specification ' +
+          'says. It is not evidence that this page is production-ready, that your browser is ' +
+          'secure, or that the construction resists every attack.',
+        'aside-note'
+      ),
     ]
   );
 }

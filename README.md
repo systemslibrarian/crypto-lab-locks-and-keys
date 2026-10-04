@@ -1,9 +1,9 @@
 # Locks and Keys
 
 Public and private keys, shown rather than asserted. A real 2048-bit RSA key pair is
-generated in your browser; you lock a short note to the public half with **RSA-OAEP**, open it
-with the private half, watch an unrelated key fail to open it, and then run **the same pair
-backwards** to sign and verify with **RSA-PSS**.
+generated in your browser; a note is encrypted to the public half with **RSA-OAEP**, opened with
+the private half, an unrelated key fails to open it — and then **the same pair does its other
+job**, signing and verifying with **RSA-PSS**.
 
 **Live demo:** <https://systemslibrarian.github.io/crypto-lab-locks-and-keys/>
 
@@ -38,7 +38,7 @@ it. The page says so in its own words, not just here.
 
 The lab declares one **negative claim**, and demonstrates it rather than disclaiming it:
 
-> A lock that opens does not tell you who closed it. RSA-OAEP decryption establishes nothing at
+> A note that opens does not tell you who sent it. RSA-OAEP decryption establishes nothing at
 > all about the sender: anyone holding the public half can produce a block this private half
 > opens, and the block carries no record of who made it.
 
@@ -46,8 +46,13 @@ Step 3's third button reaches a state where **every check the page performs repo
 the property is violated anyway** — a stranger holding nothing but your public bytes writes a
 message you never typed, and your own private half opens it perfectly. The verdict reads
 `OPENED — AND UNATTRIBUTED`. There is no failure code to show, because there is no check there
-that could fail: the locked block has no sender field in it. The absence of a code is the
+that could fail: the encrypted block has no sender field in it. The absence of a code is the
 exhibit. That state is also the reason Step 4 exists, and the page hands you straight to it.
+
+Step 4 then draws the *second* boundary, in the state where a reader is most likely to over-read
+a result: a verified signature says the signature matches this note under this public half, and
+connecting that to a person needs the separate knowledge that the key is theirs. The page says
+so beside the VERIFIED verdict, not in a footnote.
 
 Two things the lab is also explicit about in-page:
 
@@ -65,22 +70,31 @@ Two things the lab is also explicit about in-page:
 1. **Step 1 — Make a pair.** One button, one real `crypto.subtle.generateKey` at 2048 bits. The
    public half is shown and copyable; the private half is described and never displayed
    anywhere on the page. A short fingerprint labels the pair so you can tell it from another.
-2. **Step 2 — Close the lock.** Type a note and encrypt it to the **public** half. The result is
-   one 256-byte block of nothing readable, and it is 256 bytes whatever you typed — so an
-   observer cannot tell a one-word note from a hundred-word one. Press it twice and the bytes
-   change completely, because OAEP draws a fresh random seed per call. The panel states, beside
-   the result, that the private half was not used and was not needed.
+2. **Step 2 — Encrypt a note to you.** Maya has your **public** half and nothing else. The
+   result is one 256-byte block of nothing readable, and it is 256 bytes for any note short
+   enough to fit — so the size of the block says nothing about the length of the note. Press it
+   twice and both blocks stay on screen side by side: completely different bytes, same note,
+   because a fresh random seed goes into every encryption. The panel states, beside the result,
+   that the private half was not used and was not needed.
 3. **Step 3 — Open it.** The private half returns your note character for character. Then a
    **second, freshly generated** pair tries the same bytes and fails — painted *calmly*, because
    a lock holding shut against the wrong key is the one thing a lock is for, not an error. Then
    the negative-claim fixture above.
-4. **Step 4 — The same pair, backwards.** The panel first **proves** the pair is the one from
-   Step 1, by exporting the public half from the locking handle and the signing handle and
-   comparing the bytes. Then the private half signs, the public half checks, and one changed
-   character makes the check refuse. This is the panel that earns the lab its place: most
-   newcomers believe signing is a separate mechanism with its own keys.
-5. **Checked against somebody else's numbers.** Twelve pinned cases run in your browser on
-   arrival. Six of them are cases the construction is **required to refuse**.
+4. **Step 4 — The same pair, a different job.** The panel first **proves** the pair is the one
+   from Step 1, by exporting the public half from the encrypting handle and the verifying handle
+   and comparing the bytes. Then the private half signs, the public half verifies, and the
+   reader edits the note the checker is given — by hand, or with one button — and watches it
+   refuse, with the changed character marked. The readable note sits beside its signature
+   throughout, so "a signature does not hide the message" is shown rather than claimed. This is
+   the panel that earns the lab its place: most newcomers believe signing is a separate
+   mechanism with its own keys.
+5. **How this demo checks its own results.** Twelve pinned cases run in your browser on
+   arrival. Four of them are cases the construction is **required to refuse**, and the page
+   prints that figure by counting the fixture rather than quoting it.
+6. **A recap and three questions.** A table of which key does which job and what each result
+   does *not* establish, then three scenario questions with no score attached. Short optional
+   predictions sit before the Step 3 and Step 4 experiments, so a reader commits to an answer
+   before the page shows them one.
 
 ### One pair, not two
 
@@ -93,12 +107,31 @@ byte-identical — and `makePair()` asserts that at the moment the pair is made 
 trusting it, which means a future edit reaching for a second `generateKey` throws there instead
 of letting the page go on claiming something untrue.
 
+### "Different jobs", not "backwards"
+
+An earlier version of this lab called Step 4 *the same pair, backwards*, and that phrasing was
+the one genuinely misleading thing in it. It is gone from the page, the metadata and this file.
+
+What is true is that one pair does both jobs and the halves swap roles: public encrypts /
+private decrypts, then private signs / public verifies. What is **not** true is that signing is
+encryption run backwards. RSAES-OAEP and RSASSA-PSS are different constructions with different
+padding, and PSS verification does not decrypt a signature to recover a message — it rebuilds an
+encoded block and checks its structure. "Running the pair backwards" describes the raw trapdoor,
+not either scheme, and a beginner who takes it literally ends up believing a signature is a
+secret in reverse. Other public-key families do not offer both jobs on one pair at all, and
+production systems routinely keep signing and encryption keys separate.
+
+The insight the brief was reaching for survives — newcomers really do believe signing is a
+separate mechanism with its own keys — and the lab still proves the pair is the same one. Only
+the false mechanism claim is gone, and a `claims` test asserts the page does not say
+"backwards".
+
 ## When to Use It
 
 - **Use it** as the first thing someone meets about public-key cryptography — it is step 2 of
   the catalog's "Start here" path, after *what a hash is*.
-- **Use it** to settle the signing question. "Signing is the same pair run backwards" is a
-  sentence people nod at and do not believe; Step 4 makes it a measurement.
+- **Use it** to settle the signing question. "One pair does both jobs" is a sentence people nod
+  at and do not believe; Step 4 makes it a measurement by exporting the public half twice.
 - **Do NOT use it** as a guide to building anything. Encrypting a message directly to someone's
   RSA public key is not how working systems do this — they encrypt a *key* to the public half
   and the message to that key, which is what **HPKE Envelope** shows. The 190-byte ceiling you
@@ -181,7 +214,7 @@ catalog's `tools/playwright-ports.json`.
 
 ## Build & Verify
 
-**21 unit tests** (3 files) + **16 claims tests** + **3 accessibility drives**.
+**30 unit tests** (4 files) + **27 claims tests** + **3 accessibility drives**.
 
 **Correctness, in two independent halves.** A freshly generated key pair has no published answer
 to compare against, so:
@@ -192,7 +225,9 @@ to compare against, so:
   its key argument entirely. Cross-pair rejection fails both. It also asserts that the right key
   still works *in the same run*, so a build that refuses everything cannot pass by refusing.
 - `src/crypto/vectors.test.ts` runs **12 pinned cases from Project Wycheproof** — the only check
-  in this repo that could disagree with the lab. Six are cases the construction must **refuse**.
+  in this repo that could disagree with the lab. Four are cases the construction must
+  **refuse**, and `src/crypto/vectors.test.ts` asserts both kinds are present so a regeneration
+  cannot quietly drop the half that bites.
 
 **On the pinned vectors, and a correction to the build brief.** `brief.md` asks for "a pinned
 RSA-OAEP / RSA-PSS vector from RFC 8017's test data". **RFC 8017 publishes no test data** — its

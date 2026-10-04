@@ -32,9 +32,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # GitHub's default is 360 minutes, which is where a hung run's six silent
-    # hours come from. This suite runs in about three minutes, so 20 is generous
-    # and still fails loudly rather than stalling.
-    timeout-minutes: 20
+    # hours come from. The a11y drive measures ~6.5 minutes locally across its
+    # three widths -- it scans after every one of ~35 states -- so 30 leaves
+    # real headroom on a slower runner while still failing loudly rather than
+    # stalling for hours.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

@@ -20,8 +20,8 @@ export type Bytes = Uint8Array<ArrayBuffer>;
  * WebCrypto keys are bound to an algorithm: a key generated for `RSA-OAEP`
  * cannot be handed to `RSA-PSS`, and asking it to sign throws. A lab that wanted
  * to encrypt and sign would therefore reach for two `generateKey` calls — and
- * then Step 4's whole claim, that signing is the SAME pair run backwards, would
- * be false, which is the single thing this lab exists to show.
+ * then Step 4's whole claim, that ONE pair does both jobs, would be false, which
+ * is the single thing this lab exists to show.
  *
  * So one pair is generated, exported, and re-imported under the second algorithm
  * name. The key material does not change: `pair.ts` asserts that the public key

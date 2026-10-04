@@ -313,10 +313,11 @@ export async function boot(page: Page, theme: 'dark'): Promise<void> {
   // ── The page really rendered ────────────────────────────────────────────
   await expect(page.locator('main')).toHaveCount(1);
   await expect(page.locator('h1')).toHaveCount(1);
-  // Four numbered steps plus the pinned section. A fifth numbered step, or a
-  // lost one, is a change to the shape of the lab and should fail here.
-  await expect(page.locator('main > section.step')).toHaveCount(5);
-  for (const id of ['step-1', 'step-2', 'step-3', 'step-4', 'pinned-section']) {
+  // Four numbered steps, the recap, and the pinned section. A fifth numbered
+  // step, or a lost one, is a change to the shape of the lab and should fail
+  // here rather than silently.
+  await expect(page.locator('main > section.step')).toHaveCount(6);
+  for (const id of ['step-1', 'step-2', 'step-3', 'step-4', 'recap', 'pinned-section']) {
     await expect(page.locator(`#${id}`)).toBeVisible();
   }
 
@@ -328,16 +329,13 @@ export async function boot(page: Page, theme: 'dark'): Promise<void> {
   await expect(page.locator('#app')).toHaveCount(1);
 
   // Dark is the only theme, so the page must carry no theme control at all —
-  // not the shared bar's, which was removed, and not a lab-local one. The shared
-  // CSS hides any lab toggle with `display:none !important`, which would leave a
-  // dead-but-known element; asserting the count at zero catches the day one is
-  // added without going through that list.
+  // not the shared bar's, which was removed, and not a lab-local one.
   await expect(
     page.locator('#theme-toggle, #themeToggle, .theme-toggle, .theme-toggle-btn, [data-theme-toggle]')
   ).toHaveCount(0);
   await expect(page.locator('#cl-theme-toggle')).toHaveCount(0);
 
-  // ── Arrival: no pair, nothing computed, Steps 2-4 gated ─────────────────
+  // ── Arrival: no pair, nothing computed, every action gated ──────────────
   for (const id of ['s1-out', 's2-out', 's3-out', 's3-wrong-out', 's3-stranger-out',
                     's4-same-out', 's4-sign-out', 's4-check-out']) {
     await expect(page.locator(`#${id}`)).toBeEmpty();
@@ -350,42 +348,69 @@ export async function boot(page: Page, theme: 'dark'): Promise<void> {
   await expect(page.locator('[data-verdict]')).toHaveCount(1);
   await expect(page.locator('[data-verdict="pinned"]')).toHaveCount(1);
 
-  // The gates are the arrival state's load-bearing structure: every control in
-  // Steps 2-4 is disabled and each step shows one visible note. Asserting the
-  // DISABLED count rather than reading the notes keeps this structural.
-  await expect(page.locator('#step-1 button:disabled')).toHaveCount(0);
+  // GATING IS PER CONTROL, and that is the structural fact worth asserting.
+  // Step 4 used to carry one section-wide gate on "a pair exists", so Check and
+  // tamper enabled with no signature and then silently did nothing when pressed.
+  // Every gated control declares its own prerequisite in markup; on arrival the
+  // only enabled action in the whole document is Step 1's button.
+  const gated = page.locator('button[data-needs]');
+  const gatedCount = await gated.count();
+  expect(gatedCount, 'the steps must declare their prerequisites in markup').toBeGreaterThan(3);
+  await expect(page.locator('button[data-needs]:disabled')).toHaveCount(gatedCount);
   await expect(page.locator('#make-pair')).toBeEnabled();
   for (const step of ['step-2', 'step-3', 'step-4']) {
-    const gated = page.locator(`#${step} [data-gated]`);
-    await expect(gated.first()).toBeDisabled();
-    const count = await gated.count();
-    expect(count, `${step} must have gated controls to disable`).toBeGreaterThan(0);
-    await expect(page.locator(`#${step} [data-gated]:disabled`)).toHaveCount(count);
     await expect(page.locator(`#${step} .gate-note`)).toBeVisible();
     await expect(page.locator(`#${step} .gate-note`)).not.toBeEmpty();
   }
 
+  // The next-step links appear only once a step has produced something, so on
+  // arrival every one of them is hidden and empty.
+  await expect(page.locator('.next-step-link')).toHaveCount(0);
+
+  // The checker copy does not exist until there is a signature to check.
+  await expect(page.locator('#checker-wrap')).toBeHidden();
+
+  // WebCrypto is present in this browser, so the unavailable banner stays shut.
+  // Asserting it HIDDEN rather than absent keeps the element — and the branch
+  // that shows it — in the document where a reader of this file can find it.
+  await expect(page.locator('#unavailable')).toBeHidden();
+
   // ── Shipped control defaults, as SHAPES ─────────────────────────────────
-  // That the box arrives non-empty is structural: the byte counter and the
-  // Step 4 signature both read it, and an empty default would make Step 2's
-  // first press render a failure verdict. WHAT it says is a claim — claims.spec.
   await expect(page.locator('#message')).not.toHaveValue('');
-  // Printed from MAX_MESSAGE_BYTES by main.ts, so a number here at all proves
-  // the substitution ran. The VALUE is cross-checked in claims.spec against the
-  // maxlength attribute and the prose.
   await expect(page.locator('[data-max-bytes]').first()).toHaveText(/^\d+$/);
-  await expect(page.locator('#msg-count')).toHaveText(/^\d+ of \d+ bytes$/);
+  await expect(page.locator('#msg-count')).toHaveText(/^\d+ of \d+ bytes used$/);
+  await expect(page.locator('#message')).toHaveAttribute('aria-invalid', 'false');
+  // The counter and the limit note are the textarea's own description, so the
+  // reason a note is refused is announced rather than only painted.
+  await expect(page.locator('#message')).toHaveAttribute(
+    'aria-describedby',
+    'msg-count limit-note'
+  );
 
   // ── Disclosures ship shut ───────────────────────────────────────────────
   await expect(page.locator('details[open]')).toHaveCount(0);
-  await expect(page.locator('details')).toHaveCount(1); // only the quick check exists yet
+  // The on-ramp disclosure, three predictions, and the pinned case list.
+  await expect(page.locator('details')).toHaveCount(5);
 
   // ── The pinned run finishes, because nothing awaits it ──────────────────
-  // `main.ts` calls `mountPinned()` with `void`. If it never settles, this
-  // region stays empty and every later scan would be scanning a page that is
-  // still loading — the exact scan race `waitForTimeout(400)` used to hide.
   await expect(page.locator('#pinned-out [data-verdict="pinned"]')).toBeVisible();
-  await expect(page.locator('#pinned-out .case')).toHaveCount(12);
+
+  // ── The closing questions are rendered, and unanswered ──────────────────
+  // Three questions, each with real options and an unanswered result. The
+  // per-question shape is asserted rather than one magic total: a total is the
+  // kind of number that is wrong on the first write (it was, by one) and tells
+  // you nothing about WHICH question lost its options.
+  await expect(page.locator('#recap .scenario')).toHaveCount(3);
+  await expect(page.locator('#recap .check-result')).toHaveCount(3);
+  for (const n of [1, 2, 3]) {
+    const options = page.locator(`#scenario-${n} .check-opt`);
+    expect(
+      await options.count(),
+      `scenario ${n} must offer a choice, not a single button`
+    ).toBeGreaterThan(1);
+    await expect(page.locator(`#scenario-${n} .check-q`)).not.toBeEmpty();
+    await expect(page.locator(`#scenario-${n} .check-result`)).toBeEmpty();
+  }
 
   await settle(page);
   await expectNotBlank(page, `${theme} first paint`);
@@ -809,9 +834,16 @@ async function press(
   await expect(verdict).toHaveAttribute('data-tone', tone);
 }
 
-/** Open a disclosure the way a reader does, and prove it opened. */
-async function reveal(page: Page, summary: string | RegExp): Promise<void> {
-  const details = page.locator('details', { has: page.getByText(summary) }).first();
+/**
+ * Open a disclosure the way a reader does, and prove it opened.
+ *
+ * `nth` is needed because the three predictions deliberately share one summary
+ * wording ("Predict first — optional"): a reader meets them one at a time and a
+ * different label for each would be noise. `.first()` would silently reopen the
+ * same one, so the index is explicit where it matters.
+ */
+async function reveal(page: Page, summary: string | RegExp, nth = 0): Promise<void> {
+  const details = page.locator('details', { has: page.getByText(summary) }).nth(nth);
   await details.locator('> summary').click();
   await expect(details).toHaveAttribute('open', '');
 }
@@ -859,8 +891,9 @@ async function reveal(page: Page, summary: string | RegExp): Promise<void> {
 export async function driveAllStates(page: Page, theme: string): Promise<void> {
   const scanAt = (s: string): Promise<void> => scan(page, `${theme} / ${s}`);
   const message = page.locator('#message');
+  const checker = page.locator('#checker-text');
 
-  await scanAt('arrival: no pair, three steps gated, disclosures shut, pinned cases green');
+  await scanAt('arrival: no pair, every action gated, disclosures shut, pinned cases green');
 
   // ── The shared skip link, focused ───────────────────────────────────────
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.());
@@ -868,37 +901,50 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await expect(page.locator('a.cl-skip-link')).toBeFocused();
   await scanAt('the shared skip link focused, slid in from top:-3rem');
 
+  // ── The on-ramp disclosure, which carries everything the intro no longer does
+  await reveal(page, /Why RSA here/);
+  await scanAt('the on-ramp disclosure open — the honesty note and the scoping');
+
   // ── Step 1: a real pair ─────────────────────────────────────────────────
   await press(page, 'Make a key pair', 'pair-made', 'pass');
-  // The gates opening is the structural consequence of a pair existing.
   await expect(page.locator('#close-lock')).toBeEnabled();
   await expect(page.locator('#step-2 .gate-note')).toBeHidden();
-  await scanAt('Step 1: a pair exists — the two halves side by side, Steps 2 and 4 ungated');
+  // The next-step link is a new paint, and it only exists after a result.
+  await expect(page.locator('#s1-next .next-step-link')).toBeVisible();
+  await scanAt('Step 1: a pair exists — both halves badged, the next-step link painted');
 
   await reveal(page, 'Show the public half as bytes');
   await scanAt('Step 1: the public half disclosed as base64');
 
   // ── Step 2: the refusals first, so the pass verdict is not what replaces them
   await message.fill('');
-  await press(page, 'Close the lock', 'locked', 'fail');
+  await press(page, 'Encrypt the note', 'locked', 'fail');
   await scanAt('Step 2: nothing typed — the empty-note refusal');
 
   // 100 accented characters: 200 UTF-8 bytes, 100 UTF-16 units. Inside the
-  // maxlength, outside the lock's capacity. This state is why the limit is
-  // counted in bytes and not in characters.
+  // maxlength, outside the key's capacity. This state is why the limit is
+  // counted in bytes and not in characters, and it also paints the counter's
+  // alarm colour and the textarea's `aria-invalid` boundary.
   await message.fill('é'.repeat(100));
   await expect(page.locator('#msg-count')).toHaveClass(/over/);
-  await press(page, 'Close the lock', 'locked', 'fail');
-  await scanAt('Step 2: 200 bytes in a 190-byte lock — the over-length refusal, counter in alarm');
+  await expect(message).toHaveAttribute('aria-invalid', 'true');
+  await press(page, 'Encrypt the note', 'locked', 'fail');
+  await scanAt('Step 2: 200 bytes in a 190-byte budget — refusal, counter and input in alarm');
 
   await message.fill('Meet me at the north gate at six.');
   await expect(page.locator('#msg-count')).not.toHaveClass(/over/);
-  await press(page, 'Close the lock', 'locked', 'pass');
+  await press(page, 'Encrypt the note', 'locked', 'pass');
   await expect(page.locator('#open-lock')).toBeEnabled();
-  await scanAt('Step 2: locked — the byte strip and the private-half-unused note');
+  await scanAt('Step 2: encrypted — the byte strip and the private-half-unused note');
 
-  await reveal(page, 'Show all the locked bytes');
-  await scanAt('Step 2: all 256 locked bytes disclosed');
+  // Encrypting again keeps BOTH blocks on screen, which is a layout the single
+  // preview never produced: two monospace columns inside a step card.
+  await press(page, 'Encrypt the note', 'locked', 'pass');
+  await expect(page.locator('.compare .byte-strip-code')).toHaveCount(2);
+  await scanAt('Step 2: encrypted twice — both blocks side by side and the comparison stated');
+
+  await reveal(page, 'Show all the encrypted bytes');
+  await scanAt('Step 2: all 256 encrypted bytes disclosed');
 
   // The copy interaction repaints the button's label; either wording is a real
   // state, because headless Chromium denies the clipboard. Scanned while still
@@ -909,9 +955,18 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await scanAt('Step 2: a copy button in its just-clicked state, still hovered');
   await expect(copyBtn).not.toHaveText(/Copied|Copy failed/, { timeout: 5000 });
 
-  // ── Step 3: open, refuse, and the fixture ───────────────────────────────
-  await press(page, 'Open with my private half', 'opened', 'pass');
+  // ── Step 3: predictions, then the three experiments ─────────────────────
+  await press(page, 'Open it with my private half', 'opened', 'pass');
   await scanAt('Step 3: opened — the recovered note quoted back');
+
+  await reveal(page, /Predict first/, 0);
+  await page.locator('#predict-wrong-key .check-opt').last().click();
+  await expect(page.locator('#predict-wrong-key .check-result')).toHaveClass(/pill-bad/);
+  await scanAt('Step 3: a prediction answered wrong — the pill-bad tint and its explanation');
+
+  await page.locator('#predict-wrong-key .check-opt').first().click();
+  await expect(page.locator('#predict-wrong-key .check-result')).toHaveClass(/pill-ok/);
+  await scanAt('Step 3: the same prediction answered right — the pill-ok tint');
 
   // A genuinely fresh second pair, generated behind this click.
   await press(page, 'Try a different private key', 'wrong-key', 'held');
@@ -919,12 +974,16 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
 
   await press(page, 'Let a stranger use my public half', 'unattributed', 'alarm');
   await expect(page.locator('.negative-claim')).toBeVisible();
+  await expect(page.locator('#s3-next .next-step-link')).toBeVisible();
   await scanAt('Step 3: OPENED AND UNATTRIBUTED — the negative-claim fixture in alarm');
 
-  // ── Step 4: the same pair, backwards ────────────────────────────────────
-  await press(page, 'Sign my note with the private half', 'signed', 'pass');
+  // ── Step 4: the same pair, a different job ──────────────────────────────
+  await press(page, 'Sign the note with my private half', 'signed', 'pass');
   await expect(page.locator('[data-verdict="same-pair"]')).toHaveAttribute('data-tone', 'pass');
-  await scanAt('Step 4: SAME PAIR proved by export, and the signature made');
+  // The checker copy appears only now, which is a new control and a new label.
+  await expect(page.locator('#checker-wrap')).toBeVisible();
+  await expect(page.locator('#check-sig')).toBeEnabled();
+  await scanAt('Step 4: SAME PAIR proved by export, the signature made, the checker box revealed');
 
   await reveal(page, 'Show both exports side by side');
   await scanAt('Step 4: both public-key exports disclosed for comparison');
@@ -933,41 +992,58 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await scanAt('Step 4: the whole signature disclosed');
 
   await press(page, 'Check the signature', 'checked', 'pass');
-  await scanAt('Step 4: VERIFIED with the public half alone');
+  await scanAt('Step 4: VERIFIED — the seal glyph and the trust-boundary note');
 
-  await press(page, /Change one character and check again/, 'checked', 'held');
-  await scanAt('Step 4: one character changed — the check refuses, calmly');
+  await press(page, /Change one character for me/, 'checked', 'held');
+  await expect(page.locator('.diff-mark')).toHaveCount(1);
+  await scanAt('Step 4: an edited note refused — the marked diff inside the quote');
 
-  // ── The quick check, both answers ───────────────────────────────────────
-  await reveal(page, /which half made the signature/);
-  await scanAt('Step 4: the quick check open, unanswered');
+  // Tampering by hand, which is the route the button only demonstrates. A longer
+  // edit paints several marks, so the diff is scanned at more than one length.
+  const signedText = await page.locator('#s4-check-out .recovered-text').first().innerText();
+  await checker.fill(`${signedText} and bring the money.`);
+  await press(page, 'Check the signature', 'checked', 'held');
+  await scanAt('Step 4: a hand-typed tamper — several marked graphemes');
 
-  await page.locator('.check-opt', { hasText: 'A separate signing key' }).click();
-  await expect(page.locator('#check-result')).toHaveClass(/pill-bad/);
-  await scanAt('Step 4: the quick check answered wrong — the pill-bad tint');
+  // ── The recap and the closing questions ─────────────────────────────────
+  await page.locator('#scenario-1 .check-opt').nth(1).click();
+  await expect(page.locator('#scenario-1 .check-result')).toHaveClass(/pill-bad/);
+  await scanAt('the recap table, with a closing question answered wrong');
 
-  await page.locator('.check-opt', { hasText: 'The private half signed' }).click();
-  await expect(page.locator('#check-result')).toHaveClass(/pill-ok/);
-  await scanAt('Step 4: the quick check answered right — the pill-ok tint');
+  await page.locator('#scenario-1 .check-opt').first().click();
+  await expect(page.locator('#scenario-1 .check-result')).toHaveClass(/pill-ok/);
+  await scanAt('the recap table, with a closing question answered right');
 
-  // ── Retirement ──────────────────────────────────────────────────────────
-  // Changing the note invalidates the lock and everything downstream of it, so
-  // those verdicts are replaced by retirement notices in their own tone. This
-  // is a rendering ordinary use reaches and no other state here shows.
+  // The recap table is the one shape on this page allowed to scroll sideways,
+  // so it is scanned focused — that is where its keyboard route and label are
+  // judged (WCAG 2.1.1).
+  await page.locator('.table-wrap').focus();
+  await expect(page.locator('.table-wrap')).toBeFocused();
+  await scanAt('the recap table focused as a scroll region');
+
+  // ── The pinned case list, which ships shut ──────────────────────────────
+  await reveal(page, /Show all 12 cases/);
+  await expect(page.locator('#pinned-out .case')).toHaveCount(12);
+  await scanAt('the pinned case list expanded — twelve rows, both kinds');
+
+  // ── Supersession is a state a reader reaches by ordinary use ────────────
   await message.fill('Meet me at the south gate at seven.');
   await expect(page.locator('[data-verdict-retired="locked"]')).toBeVisible();
   await expect(page.locator('[data-verdict="locked"]')).toHaveCount(0);
-  await scanAt('a changed note retires the stale verdicts — the retirement notice');
+  await scanAt('a changed note supersedes four verdicts at once — the OUT OF DATE notices');
 
   // ── Hover, which persists after a click ─────────────────────────────────
-  await page.getByRole('button', { name: 'Close the lock' }).hover();
+  await page.getByRole('button', { name: 'Encrypt the note' }).hover();
   await scanAt('a primary button hovered — its accent fill repainted');
 
   await page.locator('#s1-out .copy-btn').first().hover();
   await scanAt('a quiet copy button hovered');
 
-  await page.locator('.check-opt').first().hover();
-  await scanAt('a quick-check option hovered — its accent wash repainted');
+  await page.locator('#scenario-2 .check-opt').first().hover();
+  await scanAt('a closing-question option hovered — its accent wash repainted');
+
+  await page.locator('#s1-next .next-step-link').hover();
+  await scanAt('a next-step link hovered');
 
   await page.locator('.cl-topbar .cl-btn').first().hover();
   await scanAt('a shared top bar control hovered');
@@ -977,9 +1053,22 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await expect(message).toBeFocused();
   await scanAt('the note textarea focused, showing its focus-visible outline');
 
+  await checker.focus();
+  await expect(checker).toBeFocused();
+  await scanAt('the checker textarea focused');
+
   await page.getByRole('button', { name: 'Make another pair' }).focus();
   await scanAt('a primary button focused');
 
   await page.locator('#pinned-out .source-line a').focus();
   await scanAt('the pinned-source link focused — an inline link with a persistent underline');
+
+  // ── A gated control, after a new pair resets the path ───────────────────
+  // Disabled controls are inactive components and exempt from contrast, but the
+  // gate notes beside them are real prose and are not. This is the only state
+  // where a note is visible next to a FRESH verdict rather than on arrival.
+  await press(page, 'Make another pair', 'pair-made', 'pass');
+  await expect(page.locator('#check-sig')).toBeDisabled();
+  await expect(page.locator('#step-4 .gate-note')).toBeVisible();
+  await scanAt('a new pair re-gates Steps 3 and 4 — gate notes beside a fresh verdict');
 }
