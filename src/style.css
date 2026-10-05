@@ -21,7 +21,7 @@
      here. The shared top bar reads it; see README "Pending central assignment". */
   /* Assigned centrally from the catalog on 2026-10-04, chosen so this card
      differs from its neighbours at four, two and one columns. */
-  --accent: #9f88ff;
+  --accent: #ff6b7f;
   --accent-ink: #04201b; /* text on an accent fill */
   --accent-text: #6ee3cd; /* accent as text / links / borders on the page bg */
 
