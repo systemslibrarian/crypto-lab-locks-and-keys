@@ -19,7 +19,9 @@
   /* Placeholder pending central assignment -- the catalog pins each lab's
      accent, and this is the documented fleet fallback rather than a choice made
      here. The shared top bar reads it; see README "Pending central assignment". */
-  --accent: #35d6bb;
+  /* Assigned centrally from the catalog on 2026-10-04, chosen so this card
+     differs from its neighbours at four, two and one columns. */
+  --accent: #9f88ff;
   --accent-ink: #04201b; /* text on an accent fill */
   --accent-text: #6ee3cd; /* accent as text / links / borders on the page bg */
 
