@@ -22,8 +22,13 @@
   /* Assigned centrally from the catalog on 2026-10-04, chosen so this card
      differs from its neighbours at four, two and one columns. */
   --accent: #ff6b7f;
-  --accent-ink: #04201b; /* text on an accent fill */
-  --accent-text: #6ee3cd; /* accent as text / links / borders on the page bg */
+  /* Both derived FROM the accent above. They were left at the teal they had
+     while the accent was the teal fallback, so this lab rendered crimson cards
+     with teal links in eight places -- a hue mismatch the a11y gate cannot see,
+     because it measures contrast. Measured on this lab's own --bg: accent-text
+     6.90:1, and the ink 6.79:1 on an accent fill. */
+  --accent-ink: #2b0509; /* text on an accent fill */
+  --accent-text: #ff6b7f; /* accent as text / links / borders on the page bg */
 
   /* The four tones. `held` is the one this lab needed and a generic palette
      does not have: a refusal that is CORRECT. It is deliberately cool and calm,
