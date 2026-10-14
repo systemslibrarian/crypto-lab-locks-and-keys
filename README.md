@@ -12,7 +12,7 @@ job**, signing and verifying with **RSA-PSS**.
 ## What It Is
 
 A beginner's on-ramp to the single idea the rest of modern cryptography is built on: that a
-key pair is two different keys, one of which you can publish while keeping the other secret.
+key pair is two related keys: a public key you can share and a private key you keep secret.
 
 The exact primitives are **RSAES-OAEP** (RFC 8017 §7.1) with SHA-256 and MGF1-SHA-256, and
 **RSASSA-PSS** (RFC 8017 §8.1) with SHA-256 and a 32-byte salt, both called through the
