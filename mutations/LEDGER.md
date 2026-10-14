@@ -7,7 +7,7 @@ The records are also enforced rather than archived: an `afterAll` in `e2e/claims
 fails any full claims run in which a kill recorded here names a test that ran WITHOUT
 asserting its marker, so a kill can only stay recorded while its assertion still exists.
 
-Generated 2026-10-04T22:55:55.450Z.
+Generated 2026-10-14T00:50:30.832Z.
 
 ## A kill is defined by four rules, and the script enforces all four
 
@@ -16,17 +16,17 @@ Generated 2026-10-04T22:55:55.450Z.
 3. the run served the MUTATED code (bundle hash moved, and the red run is not a build or server failure)
 4. a patch that does not compile is DOES NOT BUILD and is never a kill
 
-Unmutated bundle `42fff7a6c71ed982`; restored bundle `42fff7a6c71ed982` (matches).
+Unmutated bundle `7142428305bf69da`; restored bundle `7142428305bf69da` (matches).
 
 ## Results
 
 | Mutation | Verdict | Outcome | Bundle moved | Owning test |
 |---|---|---|---|---|
-| `M1-decrypt-always-returns-plaintext` | `wrong-key` | **KILLED** | 42fff7a6c71ed982 → 18b8df9ac791c523 | Step 3 wrong key is refused CALMLY, and the page names the cause |
-| `M2-verify-always-accepts` | `checked` | **KILLED** | 42fff7a6c71ed982 → 3bf78b7616cfd98d | Step 4 refuses an edited note, marks the change, and reports it honestly |
-| `M3-wrong-key-path-reuses-right-key` | `wrong-key` | **KILLED** | 42fff7a6c71ed982 → 25b2081dd3c888e9 | Step 3 wrong key is refused CALMLY, and the page names the cause |
-| `M4-negative-claim-text-deleted` | `unattributed` | **KILLED** | 42fff7a6c71ed982 → 13e2b817da43092c | every check passes, and the message is unattributed anyway |
-| `M5-fixture-check-broken` | `unattributed` | **KILLED** | 42fff7a6c71ed982 → b65f621e6fa1554b | every check passes, and the message is unattributed anyway |
+| `M1-decrypt-always-returns-plaintext` | `wrong-key` | **KILLED** | 7142428305bf69da → a6d00090b97d279e | Step 3 wrong key is refused CALMLY, and the page names the cause |
+| `M2-verify-always-accepts` | `checked` | **KILLED** | 7142428305bf69da → 4027f0c850ae7297 | Step 4 refuses an edited note, marks the change, and reports it honestly |
+| `M3-wrong-key-path-reuses-right-key` | `wrong-key` | **KILLED** | 7142428305bf69da → cdbce112d51111b2 | Step 3 wrong key is refused CALMLY, and the page names the cause |
+| `M4-negative-claim-text-deleted` | `unattributed` | **KILLED** | 7142428305bf69da → da43702eb97cf40e | every check passes, and the message is unattributed anyway |
+| `M5-fixture-check-broken` | `unattributed` | **KILLED** | 7142428305bf69da → 92a3ed5e3f120c63 | every check passes, and the message is unattributed anyway |
 
 ## Each mutation in full
 
@@ -42,7 +42,7 @@ Unmutated bundle `42fff7a6c71ed982`; restored bundle `42fff7a6c71ed982` (matches
 
 **Owning test.** `Step 3 wrong key is refused CALMLY, and the page names the cause` — asserts the `wrong-key` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 18b8df9ac791c523.
+**Outcome: KILLED.** Baseline passed: true. Bundle 7142428305bf69da → a6d00090b97d279e.
 
 ```
 Error: expect(locator).toHaveText(expected) failed
@@ -65,7 +65,7 @@ Call log:
 
 **Owning test.** `Step 4 refuses an edited note, marks the change, and reports it honestly` — asserts the `checked` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 3bf78b7616cfd98d.
+**Outcome: KILLED.** Baseline passed: true. Bundle 7142428305bf69da → 4027f0c850ae7297.
 
 ```
 Error: expect(locator).toHaveText(expected) failed
@@ -78,7 +78,7 @@ Call log:
 
 ### `M3-wrong-key-path-reuses-right-key`
 
-**What it changes.** Step 3's wrong-key button generates a second pair, prints its genuinely different fingerprint, and then opens the lock with the READER'S OWN private half.
+**What it changes.** Step 3's wrong-key button generates a second pair, prints its genuinely different fingerprint, and then opens the lock with the READER'S OWN private key.
 
 **Why this one.** The subtlest of the three and the one a careless implementation really produces, because nothing about it looks wrong: a fresh pair IS generated, so the two fingerprints on screen genuinely differ and the panel reads exactly as intended. Only the key handed to `open` is the wrong one. Every unit test stays green - this is a UI wiring defect, not a cryptographic one - so the browser verdict is the only witness.
 
@@ -88,7 +88,7 @@ Call log:
 
 **Owning test.** `Step 3 wrong key is refused CALMLY, and the page names the cause` — asserts the `wrong-key` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 25b2081dd3c888e9.
+**Outcome: KILLED.** Baseline passed: true. Bundle 7142428305bf69da → cdbce112d51111b2.
 
 ```
 Error: expect(locator).toHaveText(expected) failed
@@ -111,7 +111,7 @@ Call log:
 
 **Owning test.** `every check passes, and the message is unattributed anyway` — asserts the `unattributed` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → 13e2b817da43092c.
+**Outcome: KILLED.** Baseline passed: true. Bundle 7142428305bf69da → da43702eb97cf40e.
 
 ```
 Error: expect(locator).toContainText(expected) failed
@@ -124,7 +124,7 @@ Call log:
 
 ### `M5-fixture-check-broken`
 
-**What it changes.** The stranger's block is opened with a freshly generated private half instead of the reader's, so the fixture's own decryption fails.
+**What it changes.** The stranger's block is opened with a freshly generated private key instead of the reader's, so the fixture's own decryption fails.
 
 **Why this one.** The other half of what §4.1d requires: break a check inside the fixture and the assertion that everything is green must fail. The page then renders THE FIXTURE DID NOT HOLD, which is the honest outcome - a fixture whose own checks fail is demonstrating the mechanism working rather than its limit, and must never be allowed to read as a demonstration of the limitation.
 
@@ -134,7 +134,7 @@ Call log:
 
 **Owning test.** `every check passes, and the message is unattributed anyway` — asserts the `unattributed` verdict marker.
 
-**Outcome: KILLED.** Baseline passed: true. Bundle 42fff7a6c71ed982 → b65f621e6fa1554b.
+**Outcome: KILLED.** Baseline passed: true. Bundle 7142428305bf69da → 92a3ed5e3f120c63.
 
 ```
 Error: expect(locator).toHaveText(expected) failed

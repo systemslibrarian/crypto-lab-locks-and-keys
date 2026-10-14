@@ -4,18 +4,18 @@
  * Three experiments, and the last one is the reason this panel is the longest in
  * the lab.
  *
- *  1. OPEN IT. The private half, and nothing else, returns the note.
+ *  1. OPEN IT. The private key, and nothing else, returns the note.
  *
  *  2. TRY A DIFFERENT PRIVATE KEY. A second pair is generated and its private
- *     half is handed the same bytes. It refuses. The panel paints that refusal
+ *     key is handed the same bytes. It refuses. The panel paints that refusal
  *     CALM — tone `held`, not `fail` and certainly not `alarm` — because the
  *     lock holding shut against the wrong key is the single thing a lock is for.
  *     A red alarm here would teach a reader that they had broken something, when
  *     what they have just done is watch it work.
  *
- *  3. LET A STRANGER USE YOUR PUBLIC HALF. This is the lab's negative-claim
+ *  3. LET A STRANGER USE YOUR PUBLIC KEY. This is the lab's negative-claim
  *     fixture (§4.1d). A party holding nothing but the exported public bytes
- *     writes a message the reader never typed, and the reader's own private half
+ *     writes a message the reader never typed, and the reader's own private key
  *     opens it perfectly. Every check on the page reports success — because
  *     there is no check here that could do otherwise. RSAES-OAEP carries no
  *     sender field, so there is nothing to verify and no error code to raise.
@@ -50,8 +50,8 @@ import { settled } from './settle';
  */
 export const NEGATIVE_CLAIM =
   'A note that opens does not tell you who sent it. RSA-OAEP decryption ' +
-  'establishes nothing at all about the sender: anyone holding the public half ' +
-  'can produce a block this private half opens, and the block carries no record ' +
+  'establishes nothing at all about the sender: anyone holding the public key ' +
+  'can produce a block this private key opens, and the block carries no record ' +
   'of who made it.';
 
 export function mountStep3(): void {
@@ -92,7 +92,7 @@ export function mountStep3(): void {
         glyph: 'warn',
         headline: 'DID NOT OPEN — AND IT SHOULD HAVE',
         detail: [
-          'Your own private half failed to open your own note. That should be impossible; ' +
+          'Your own private key failed to open your own note. That should be impossible; ' +
             'something in this build is wrong.',
         ],
       });
@@ -107,9 +107,9 @@ export function mountStep3(): void {
         glyph: 'open-lock',
         headline: 'OPENED',
         detail: [
-          'The private half returned the note, character for character.',
-          `Opened with the private half of your pair, ${pair.fingerprint} — the same pair ` +
-            'whose public half encrypted it.',
+          'The private key returned the note, character for character.',
+          `Opened with the private key of your pair, ${pair.fingerprint} — the same pair ` +
+            'whose public key encrypted it.',
         ],
       },
       [
@@ -118,8 +118,8 @@ export function mountStep3(): void {
           el('p', { class: 'recovered-text' }, [result.value]),
         ]),
         p(
-          'The public half was not used here. Encrypting took the public half and nothing ' +
-            'else; decrypting took the private half and nothing else. One pair, two jobs.',
+          'The public key was not used here. Encrypting took the public key and nothing ' +
+            'else; decrypting took the private key and nothing else. One pair, two jobs.',
           'claim-note'
         ),
       ]

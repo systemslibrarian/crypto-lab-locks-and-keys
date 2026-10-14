@@ -3,8 +3,8 @@
  *
  * Step 4's panel is built on one fact newcomers reliably get wrong: signing does
  * not need a different key pair from the encryption in Steps 2 and 3. It is the
- * same pair with the halves swapping roles. The private half, which was the only
- * thing that could DECRYPT, is now the only thing that can SIGN; the public half,
+ * same pair with the keys swapping roles. The private key, which was the only
+ * thing that could DECRYPT, is now the only thing that can SIGN; the public key,
  * which could only ENCRYPT, can now only VERIFY.
  *
  * It is NOT the same operation run backwards, and this file deliberately does not
@@ -30,7 +30,7 @@ export interface Signature {
 }
 
 /**
- * Sign with the private half.
+ * Sign with the private key.
  *
  * No public key is a parameter, exactly as `close` took no private key. PSS draws
  * a fresh random salt per signature, so signing the same sentence twice produces
@@ -53,7 +53,7 @@ export async function sign(
 }
 
 /**
- * Check with the public half.
+ * Check with the public key.
  *
  * `crypto.subtle.verify` returns false for a bad signature rather than throwing,
  * so unlike `open` this has a real boolean to report — but the result is still an

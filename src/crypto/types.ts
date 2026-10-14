@@ -30,16 +30,16 @@ export type Bytes = Uint8Array<ArrayBuffer>;
  * are four doors onto one pair.
  */
 export interface Pair {
-  /** Closes the lock. Public — the half you hand out. */
+  /** Closes the lock. Public — the key you hand out. */
   readonly lockWith: CryptoKey;
   /** Opens the lock. Private — never leaves this object. */
   readonly openWith: CryptoKey;
-  /** Signs. The SAME private half, re-imported for RSASSA-PSS. */
+  /** Signs. The SAME private key, re-imported for RSASSA-PSS. */
   readonly signWith: CryptoKey;
-  /** Checks a signature. The SAME public half, re-imported for RSASSA-PSS. */
+  /** Checks a signature. The SAME public key, re-imported for RSASSA-PSS. */
   readonly checkWith: CryptoKey;
   /**
-   * The public half's SPKI bytes — identical whichever handle they are exported
+   * The public key's SPKI bytes — identical whichever handle they are exported
    * from, which is what makes "the same pair" a measurement rather than a claim.
    */
   readonly publicKeyBytes: Bytes;
@@ -55,7 +55,7 @@ export interface Pair {
 export interface Locked {
   /** The unreadable bytes. Always one modulus-width block — 256 bytes here. */
   readonly bytes: Bytes;
-  /** The fingerprint of the pair whose public half closed this lock. */
+  /** The fingerprint of the pair whose public key closed this lock. */
   readonly lockedTo: string;
 }
 

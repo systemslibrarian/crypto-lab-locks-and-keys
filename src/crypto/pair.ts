@@ -4,13 +4,13 @@
  * Everything here is `crypto.subtle` on a 2048-bit RSA key pair. Nothing is
  * simulated and no number theory is reimplemented: RFC 8017's RSAES-OAEP (§7.1)
  * and RSASSA-PSS (§8.1) are what the browser already ships, and the teaching
- * subject of this lab is not the arithmetic — it is which half of the pair does
+ * subject of this lab is not the arithmetic — it is which key of the pair does
  * what. The arithmetic has its own lab (Educational RSA) and this one links to it
  * rather than half-explaining it.
  *
  * NO MODULUS, NO EXPONENT, AND NO PRIMES LEAVE THIS FILE. They are never
  * exported, never formatted, and never handed to the UI, because a reader who can
- * see them starts trying to read them. What the UI gets is the public half as an
+ * see them starts trying to read them. What the UI gets is the public key as an
  * opaque block of bytes and a four-byte fingerprint for telling two pairs apart.
  */
 import type { Attempt, Bytes, Pair } from './types';
@@ -25,7 +25,7 @@ export const MODULUS_BITS = 2048;
  * that padding is all the room left for the message. For a 2048-bit key with
  * SHA-256 that leaves 190 bytes — which is the honest reason this lab asks for a
  * short message rather than a paragraph, and the reason real systems encrypt a
- * KEY to the public half and the message to the key (see HPKE Envelope).
+ * KEY to the public key and the message to the key (see HPKE Envelope).
  *
  * Derived, not typed in: a hard-coded 190 would silently stop matching the day
  * MODULUS_BITS changed, and the page prints this number.
@@ -45,8 +45,8 @@ const subtle = (): SubtleCrypto => crypto.subtle;
  *
  * The export/re-import in the middle is the load-bearing part. `generateKey` for
  * RSA-OAEP returns keys that can only encrypt and decrypt; asking one to sign
- * throws `InvalidAccessError`. So the private half is exported as PKCS#8 and the
- * public half as SPKI, and both are imported a second time under `RSA-PSS`. The
+ * throws `InvalidAccessError`. So the private key is exported as PKCS#8 and the
+ * public key as SPKI, and both are imported a second time under `RSA-PSS`. The
  * bytes are unchanged, so it is the same pair — and `assertSamePair` below proves
  * that rather than asserting it.
  *
@@ -98,7 +98,7 @@ export async function assertSamePair(a: CryptoKey, b: CryptoKey): Promise<void> 
   const y = new Uint8Array(await subtle().exportKey('spki', b));
   if (!sameBytes(x, y)) {
     throw new Error(
-      'the signing half and the locking half are not the same pair — Step 4 would be a lie'
+      'the signing key and the locking key are not the same pair — Step 4 would be a lie'
     );
   }
 }
@@ -130,10 +130,10 @@ export async function fingerprint(spki: Bytes): Promise<string> {
 /**
  * Re-import a public key SPKI for checking signatures.
  *
- * This is how a reader's hypothetical correspondent would use the public half: by
+ * This is how a reader's hypothetical correspondent would use the public key: by
  * receiving those bytes and importing them, with no access to anything private.
  * Step 4 uses it so the verification on screen is demonstrably done with nothing
- * but the public half.
+ * but the public key.
  */
 export async function importPublicForChecking(spki: Bytes): Promise<CryptoKey> {
   return subtle().importKey('spki', spki, PSS, true, ['verify']);
@@ -142,7 +142,7 @@ export async function importPublicForChecking(spki: Bytes): Promise<CryptoKey> {
 /**
  * Re-import a public key SPKI for closing a lock.
  *
- * Step 3's negative-claim fixture needs a party who holds ONLY the public half,
+ * Step 3's negative-claim fixture needs a party who holds ONLY the public key,
  * and the clearest way to be sure of that is to hand it only these bytes.
  */
 export async function importPublicForLocking(spki: Bytes): Promise<CryptoKey> {

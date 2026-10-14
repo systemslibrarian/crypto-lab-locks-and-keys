@@ -4,11 +4,11 @@
  * WHY THIS IS NOT CALLED "THE SAME PAIR, BACKWARDS" ANY MORE. It was, and the
  * phrase was the one genuinely misleading thing in this lab.
  *
- * What is true: one RSA key pair does both jobs here, and the halves swap roles.
- * Steps 2 and 3 encrypt with the public half and decrypt with the private half;
- * this step signs with the private half and verifies with the public half. That
+ * What is true: one RSA key pair does both jobs here, and the keys swap roles.
+ * Steps 2 and 3 encrypt with the public key and decrypt with the private key;
+ * this step signs with the private key and verifies with the public key. That
  * really is the insight a newcomer is missing, and this panel PROVES the pair is
- * the same one by exporting the public half from both handles and comparing the
+ * the same one by exporting the public key from both handles and comparing the
  * bytes.
  *
  * What is NOT true: that signing is encryption run backwards. RSAES-OAEP and
@@ -114,7 +114,7 @@ export function mountStep4(): void {
 /**
  * The same-pair proof, computed rather than claimed.
  *
- * Exports the public half twice — once from the handle that encrypts, once from
+ * Exports the public key twice — once from the handle that encrypts, once from
  * the handle that verifies — and compares the bytes. These are two different
  * `CryptoKey` objects with two different algorithm names, and WebCrypto writes
  * the same `rsaEncryption` SPKI for both, so what survives the comparison is the
@@ -133,7 +133,7 @@ async function showSamePair(): Promise<void> {
       glyph: 'warn',
       headline: 'NOT THE SAME PAIR',
       detail: [
-        'The half that verifies signatures is not the half that encrypts, so this panel ' +
+        'The key that verifies signatures is not the key that encrypts, so this panel ' +
           'cannot claim what it claims. Something in this build is wrong.',
       ],
     });
@@ -149,7 +149,7 @@ async function showSamePair(): Promise<void> {
       headline: 'SAME PAIR',
       detail: [
         'No new keys were made for this step.',
-        `The public half used for encrypting and the public half used for verifying are ` +
+        `The public key used for encrypting and the public key used for verifying are ` +
           `the same ${fromLocking.length} bytes, compared one by one. Both are your pair, ${pair.fingerprint}.`,
       ],
     },
@@ -157,17 +157,17 @@ async function showSamePair(): Promise<void> {
       el('div', { class: 'jobs' }, [
         el('div', { class: 'job' }, [
           el('p', { class: 'job-head' }, [closedLock(), el('span', {}, ['Steps 2 and 3'])]),
-          p('Maya encrypted with your PUBLIC half. You decrypted with your PRIVATE half.', 'job-line'),
+          p('Maya encrypted with your PUBLIC key. You decrypted with your PRIVATE key.', 'job-line'),
           p('Keeps a note private.', 'job-note'),
         ]),
         el('div', { class: 'job' }, [
           el('p', { class: 'job-head' }, [key(), el('span', {}, ['Step 4 — you are the signer'])]),
-          p('You sign with your PRIVATE half. Maya verifies with your PUBLIC half.', 'job-line'),
+          p('You sign with your PRIVATE key. Maya verifies with your PUBLIC key.', 'job-line'),
           p('Lets Maya check a note matches a signature. It does not hide it.', 'job-note'),
         ]),
       ]),
       p(
-        'Read those two boxes together and you have the idea: one pair, and the halves ' +
+        'Read those two boxes together and you have the idea: one pair, and the keys ' +
           'change jobs. Encrypting and signing are different operations — a signature is ' +
           'not a secret, and it is not encryption run backwards — but in RSA the same pair ' +
           'can do both.',
@@ -175,12 +175,12 @@ async function showSamePair(): Promise<void> {
       ),
       disclosure('Show both exports side by side', [
         p(
-          'The same public half, exported twice from two different key handles. If these ' +
+          'The same public key, exported twice from two different key handles. If these ' +
             'two lines differ, this panel is lying and the verdict above says so.',
           'bytes-lede'
         ),
-        longValue(toBase64(fromLocking), 'Exported from the encrypting half'),
-        longValue(toBase64(fromChecking), 'Exported from the verifying half'),
+        longValue(toBase64(fromLocking), 'Exported from the encrypting key'),
+        longValue(toBase64(fromChecking), 'Exported from the verifying key'),
       ]),
     ]
   );
@@ -197,9 +197,9 @@ function showSigned(): void {
       glyph: 'tick',
       headline: 'SIGNED',
       detail: [
-        `${sig.bytes.length} bytes, made with the private half of your pair, ${sig.signedBy}.`,
-        'The public half was not used and was not needed — the mirror of Step 2, where the ' +
-          'private half was not used.',
+        `${sig.bytes.length} bytes, made with the private key of your pair, ${sig.signedBy}.`,
+        'The public key was not used and was not needed — the mirror of Step 2, where the ' +
+          'private key was not used.',
       ],
     },
     [
@@ -239,8 +239,8 @@ function showSigned(): void {
 /**
  * Verify the signature against whatever the checker box currently holds.
  *
- * The public half is RE-IMPORTED from the exported bytes before verifying, so
- * the check demonstrably uses nothing but the public half. A reader is entitled
+ * The public key is RE-IMPORTED from the exported bytes before verifying, so
+ * the check demonstrably uses nothing but the public key. A reader is entitled
  * to ask how they know the private key was not involved; this is the answer.
  */
 async function runCheck(): Promise<void> {
@@ -279,9 +279,9 @@ async function runCheck(): Promise<void> {
         glyph: 'seal',
         headline: 'VERIFIED',
         detail: [
-          'This signature matches this exact note, under the public half of your pair, ' +
+          'This signature matches this exact note, under the public key of your pair, ' +
             `${pair.fingerprint}.`,
-          'Verified with the public half alone, re-imported from the bytes anyone could have.',
+          'Verified with the public key alone, re-imported from the bytes anyone could have.',
         ],
       },
       [
@@ -293,8 +293,8 @@ async function runCheck(): Promise<void> {
         // over-read the result.
         p(
           'Careful what that buys. It says the signature matches this note and this public ' +
-            'half. To conclude that MAYA signed it, you also have to know that this public ' +
-            'half really is Maya’s — nothing on this page establishes that, and it is ' +
+            'key. To conclude that MAYA signed it, you also have to know that this public ' +
+            'key really is Maya’s — nothing on this page establishes that, and it is ' +
             'what certificates and key verification exist for.',
           'negative-claim'
         ),
@@ -345,7 +345,7 @@ async function runCheck(): Promise<void> {
           ? where.length === 1
             ? `One character is different — the ${ordinal(where[0])} — and the check refused it.`
             : `${where.length} characters are different, and the check refused it.`
-          : 'The signature does not match this note under this public half.',
+          : 'The signature does not match this note under this public key.',
         'Nothing went wrong. This is the check doing its job.',
       ],
     },

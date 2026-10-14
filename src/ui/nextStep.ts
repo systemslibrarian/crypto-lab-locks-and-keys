@@ -30,7 +30,7 @@ const HOPS: readonly Hop[] = [
     host: 's1-next',
     ready: () => state.pair !== null,
     href: '#step-2',
-    label: 'Continue to Step 2 — lock a note to the public half',
+    label: 'Continue to Step 2 — lock a note to the public key',
   },
   {
     host: 's2-next',

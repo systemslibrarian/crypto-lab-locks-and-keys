@@ -1,15 +1,15 @@
 /*
  * Step 1 — Make a pair.
  *
- * One button, as the brief asks. The private half is generated and never
+ * One button, as the brief asks. The private key is generated and never
  * displayed: the panel shows that it exists and says what it is for, and the
- * disclosure below carries the PUBLIC half only. There is no control anywhere in
- * this lab that reveals the private half, which is the one design decision here
+ * disclosure below carries the PUBLIC key only. There is no control anywhere in
+ * this lab that reveals the private key, which is the one design decision here
  * a reader will remember.
  *
- * The two halves are introduced as things with an OWNER and a BOUNDARY — "you
- * are Sam", this half is shareable, that half is not — because the original
- * framing ("your note, your halves") asked one reader to play every role at once
+ * The two keys are introduced as things with an OWNER and a BOUNDARY — "you
+ * are Sam", this key is shareable, that key is not — because the original
+ * framing ("your note, your keys") asked one reader to play every role at once
  * and never said which role they were in.
  */
 import { MODULUS_BITS, makePair } from '../crypto/pair';
@@ -57,9 +57,9 @@ function showPair(): void {
   const pair = state.pair;
   if (!pair) return;
 
-  const halves = el('div', { class: 'halves' }, [
+  const keys = el('div', { class: 'halves' }, [
     el('div', { class: 'half half-public' }, [
-      el('p', { class: 'half-head' }, [openLock(), el('span', {}, ['The public half'])]),
+      el('p', { class: 'half-head' }, [openLock(), el('span', {}, ['The public key'])]),
       el('p', { class: 'half-badge half-badge-share' }, ['Shareable']),
       p('Give this to anybody. Maya needs it to send you a private note.', 'half-line'),
       p(
@@ -69,7 +69,7 @@ function showPair(): void {
       ),
     ]),
     el('div', { class: 'half half-private' }, [
-      el('p', { class: 'half-head' }, [key(), el('span', {}, ['The private half'])]),
+      el('p', { class: 'half-head' }, [key(), el('span', {}, ['The private key'])]),
       el('p', { class: 'half-badge half-badge-keep' }, ['Stays with you']),
       p('Never give this to anybody. It is the only thing that opens notes sent to you.', 'half-line'),
       p(
@@ -88,28 +88,28 @@ function showPair(): void {
       glyph: 'tick',
       headline: 'A PAIR EXISTS',
       detail: [
-        `Two matching halves of one ${MODULUS_BITS}-bit key pair, made in your browser a moment ago.`,
+        `Two matching keys, one ${MODULUS_BITS}-bit pair, made in your browser a moment ago.`,
         `This pair goes by ${pair.fingerprint} on this page, so you can tell it from another one later.`,
       ],
     },
     [
-      halves,
+      keys,
       p(
-        `${pair.fingerprint} is a short label for the public half, not a security check — ` +
+        `${pair.fingerprint} is a short label for the public key, not a security check — ` +
           'four bytes is far too few for that, and matching labels would never be grounds ' +
           'for trusting a key. It is here so Step 3 can show you a different pair and Step 4 ' +
           'can show you the same one.',
         'aside-note'
       ),
-      disclosure('Show the public half as bytes', [
+      disclosure('Show the public key as bytes', [
         p(
-          `The public half, exactly as it would travel: ${pair.publicKeyBytes.length} bytes, ` +
+          `The public key, exactly as it would travel: ${pair.publicKeyBytes.length} bytes, ` +
             'base64. This is the whole of what you would send someone. Base64 is just a way ' +
             'of writing bytes with letters; it is not encryption and it hides nothing.',
           'bytes-lede'
         ),
-        longValue(toBase64(pair.publicKeyBytes), 'Public half'),
-        copyButton('Copy the public half', () =>
+        longValue(toBase64(pair.publicKeyBytes), 'Public key'),
+        copyButton('Copy the public key', () =>
           toBase64(state.pair?.publicKeyBytes ?? new Uint8Array())
         ),
       ]),

@@ -118,8 +118,8 @@ function showLocked(): void {
 
   extra.push(
     p(
-      'Your private half was not used here, and was not needed. Encrypting takes only the ' +
-        'public half — which is exactly why handing that half out is safe.',
+      'Your private key was not used here, and was not needed. Encrypting takes only the ' +
+        'public key — which is exactly why handing that key out is safe.',
       'claim-note'
     ),
     p(
@@ -151,7 +151,7 @@ function showLocked(): void {
       headline: 'ENCRYPTED',
       detail: [
         `${locked.bytes.length} bytes, and none of them readable.`,
-        `Encrypted to the public half of your pair, ${locked.lockedTo}.`,
+        `Encrypted to the public key of your pair, ${locked.lockedTo}.`,
       ],
     },
     extra

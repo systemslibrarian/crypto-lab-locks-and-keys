@@ -309,6 +309,27 @@ textarea {
   color: var(--bad-text);
   font-weight: 700;
 }
+/* A step's optional depth. Same shape as `.intro-more`, deliberately a separate
+   class: `claims.spec.ts` locates `.intro-more` strictly, so a second element
+   wearing that class would break it with a strict-mode violation. */
+.step-more {
+  margin: 0.9rem 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface-2);
+  padding: 0.5rem 0.8rem;
+}
+.step-more > summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.93rem;
+  padding: 0.2rem 0;
+}
+.step-more-body p {
+  font-size: 0.93rem;
+  color: var(--text-dim);
+  margin: 0.5rem 0 0;
+}
 .limit-note {
   margin: 0.5rem 0 0.2rem;
   font-size: 0.9rem;
@@ -395,7 +416,7 @@ textarea {
   color: var(--text-dim);
 }
 
-/* ---------- the two halves, and the two jobs ---------- */
+/* ---------- the two keys, and the two jobs ---------- */
 .halves,
 .jobs {
   display: grid;

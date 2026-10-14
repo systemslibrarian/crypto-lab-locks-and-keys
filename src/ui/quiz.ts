@@ -43,10 +43,10 @@ const QUESTIONS: readonly Question[] = [
     prompt: 'Before you press it: will a different private key open this note?',
     options: [
       {
-        label: 'No — only the matching private half opens it',
+        label: 'No — only the matching private key opens it',
         correct: true,
         because:
-          'Right. The note was encrypted to one particular public half, and only its partner ' +
+          'Right. The note was encrypted to one particular public key, and only its partner ' +
           'opens it. An unrelated key is not a worse key; it is the wrong key.',
       },
       {
@@ -54,30 +54,30 @@ const QUESTIONS: readonly Question[] = [
         correct: false,
         because:
           'Not quite. A private key is not a universal decryptor. It only opens notes ' +
-          'encrypted to its own public half, which is the whole reason you can publish that ' +
-          'half safely.',
+          'encrypted to its own public key, which is the whole reason you can publish that ' +
+          'key safely.',
       },
     ],
   },
   {
     host: 'predict-stranger',
     prompt:
-      'Before you press it: your public half is public. If a stranger uses it to encrypt ' +
-      'something, will your private half open it?',
+      'Before you press it: your public key is public. If a stranger uses it to encrypt ' +
+      'something, will your private key open it?',
     options: [
       {
         label: 'Yes — and nothing will say who sent it',
         correct: true,
         because:
-          'Right, and this is the uncomfortable part. Anyone with the public half can produce ' +
-          'something your private half opens. Decryption working tells you the note was ' +
+          'Right, and this is the uncomfortable part. Anyone with the public key can produce ' +
+          'something your private key opens. Decryption working tells you the note was ' +
           'encrypted to you; it says nothing about who did it.',
       },
       {
         label: 'No — it only opens notes I was meant to receive',
         correct: false,
         because:
-          'Not quite. There is no "meant to" in the mechanism. The public half is public, so ' +
+          'Not quite. There is no "meant to" in the mechanism. The public key is public, so ' +
           'anybody can use it, and the result is indistinguishable from a note sent by someone ' +
           'you trust.',
       },
@@ -106,14 +106,14 @@ const QUESTIONS: readonly Question[] = [
   },
   {
     host: 'check-roles',
-    prompt: 'You just signed a note and verified it. Which half did each job?',
+    prompt: 'You just signed a note and verified it. Which key did each job?',
     options: [
       {
-        label: 'The private half signed; the public half verified',
+        label: 'The private key signed; the public key verified',
         correct: true,
         because:
-          'Right. The half you keep is the half that signs — which is what makes a signature ' +
-          'worth anything, since nobody else has it. The half you publish is the half that ' +
+          'Right. The key you keep is the key that signs — which is what makes a signature ' +
+          'worth anything, since nobody else has it. The key you publish is the key that ' +
           'checks, which is why anybody can check.',
       },
       {
@@ -121,62 +121,62 @@ const QUESTIONS: readonly Question[] = [
         correct: false,
         because:
           'Not here. This demo generated exactly ONE pair, in Step 1, and the SAME PAIR box ' +
-          'above proves it by exporting the public half from both handles. Worth knowing, ' +
+          'above proves it by exporting the public key from both handles. Worth knowing, ' +
           'though: real systems often DO keep separate keys for signing and encryption, on ' +
           'purpose. That is a choice about key management, not something the maths requires.',
       },
       {
-        label: 'The public half signed; the private half verified',
+        label: 'The public key signed; the private key verified',
         correct: false,
         because:
-          'The other way round. If the public half could sign, everybody could sign as you — ' +
-          'and if checking needed the private half, nobody but you could check.',
+          'The other way round. If the public key could sign, everybody could sign as you — ' +
+          'and if checking needed the private key, nobody but you could check.',
       },
     ],
   },
   {
     host: 'scenario-1',
-    prompt: 'A friend wants to send you a private note. Which half do you give them?',
+    prompt: 'A friend wants to send you a private note. Which key do you give them?',
     options: [
       {
-        label: 'The public half',
+        label: 'The public key',
         correct: true,
         because:
-          'Right. They encrypt with your public half; only your private half opens the result. ' +
-          'You can send the public half over anything, even a channel somebody is reading.',
+          'Right. They encrypt with your public key; only your private key opens the result. ' +
+          'You can send the public key over anything, even a channel somebody is reading.',
       },
       {
-        label: 'The private half',
+        label: 'The private key',
         correct: false,
         because:
-          'No — and this is the one mistake with no recovery. Handing out the private half ' +
+          'No — and this is the one mistake with no recovery. Handing out the private key ' +
           'means anyone who ever recorded a note encrypted to you can now read it.',
       },
       {
         label: 'Both, so either one works',
         correct: false,
         because:
-          'No. The halves are not interchangeable, and sending the private half undoes the ' +
-          'whole arrangement. Only the public half travels.',
+          'No. The keys are not interchangeable, and sending the private key undoes the ' +
+          'whole arrangement. Only the public key travels.',
       },
     ],
   },
   {
     host: 'scenario-2',
-    prompt: 'A note decrypts successfully with your private half. Does that establish who sent it?',
+    prompt: 'A note decrypts successfully with your private key. Does that establish who sent it?',
     options: [
       {
-        label: 'No — anyone with the public half could have made it',
+        label: 'No — anyone with the public key could have made it',
         correct: true,
         because:
           'Right, and you proved it in Step 3. Successful decryption establishes that the note ' +
-          'was encrypted to your public half, and nothing more.',
+          'was encrypted to your public key, and nothing more.',
       },
       {
         label: 'Yes — only someone I trust could have encrypted it',
         correct: false,
         because:
-          'No. The public half is public by design, so "someone who could encrypt to you" is ' +
+          'No. The public key is public by design, so "someone who could encrypt to you" is ' +
           'everybody. A signature is what narrows it down.',
       },
     ],

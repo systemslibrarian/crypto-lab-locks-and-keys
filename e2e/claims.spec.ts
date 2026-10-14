@@ -108,9 +108,9 @@ async function fullRun(page: Page): Promise<void> {
   await page.waitForSelector('[data-verdict="pair-made"]');
   await page.getByRole('button', { name: 'Encrypt the note' }).click();
   await page.waitForSelector('[data-verdict="locked"]');
-  await page.getByRole('button', { name: 'Open it with my private half' }).click();
+  await page.getByRole('button', { name: 'Open it with my private key' }).click();
   await page.waitForSelector('[data-verdict="opened"]');
-  await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+  await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
   await page.waitForSelector('[data-verdict="signed"]');
   await page.getByRole('button', { name: 'Check the signature' }).click();
   await page.waitForSelector('[data-verdict="checked"]');
@@ -222,7 +222,7 @@ test.describe('what the page says on arrival', () => {
 });
 
 test.describe('each step verdict, read off the computed result', () => {
-  test('Step 1 names the pair it just made, and both halves are described', async ({ page }) => {
+  test('Step 1 names the pair it just made, and both keys are described', async ({ page }) => {
     await boot(page, 'dark');
     witness(test.info().title, 'pair-made');
     await page.getByRole('button', { name: 'Make a key pair' }).click();
@@ -240,14 +240,14 @@ test.describe('each step verdict, read off the computed result', () => {
     expect(b64(exported).length).toBe(294);
     await expect(page.locator('#s1-out .bytes-lede')).toContainText('294 bytes');
 
-    // WHICH HALF IS SHAREABLE, in words and not only in colour.
+    // WHICH KEY IS SHAREABLE, in words and not only in colour.
     await expect(page.locator('.half-public .half-badge')).toHaveText('Shareable');
     await expect(page.locator('.half-private .half-badge')).toHaveText('Stays with you');
-    // Both of the public half's jobs are named, and both of the private half's.
+    // Both of the public key's jobs are named, and both of the private key's.
     await expect(page.locator('.half-public')).toContainText('verifies signatures');
     await expect(page.locator('.half-private')).toContainText('decrypts, and it signs');
 
-    // The private half is described and never shown.
+    // The private key is described and never shown.
     const text = await page.locator('#app').innerText();
     expect(text).not.toMatch(/BEGIN (RSA )?PRIVATE KEY/);
   });
@@ -282,7 +282,7 @@ test.describe('each step verdict, read off the computed result', () => {
     expect(promised).toBe(width - 2 * 32 - 2);
 
     await expect(page.locator('#s2-out .claim-note').first()).toContainText(
-      'private half was not used'
+      'private key was not used'
     );
     // The fixed block size is scoped to notes that FIT, and does not claim to
     // hide metadata. "A one-word message from a hundred-word one" was wrong:
@@ -318,7 +318,7 @@ test.describe('each step verdict, read off the computed result', () => {
     await page.getByRole('button', { name: 'Make a key pair' }).click();
     await page.locator('#message').fill(note);
     await page.getByRole('button', { name: 'Encrypt the note' }).click();
-    await page.getByRole('button', { name: 'Open it with my private half' }).click();
+    await page.getByRole('button', { name: 'Open it with my private key' }).click();
 
     const verdict = page.locator('[data-verdict="opened"]');
     await expect(verdict).toHaveAttribute('data-tone', 'pass');
@@ -360,7 +360,7 @@ test.describe('each step verdict, read off the computed result', () => {
     witness(test.info().title, 'checked');
     await page.getByRole('button', { name: 'Make a key pair' }).click();
     const mine = await fingerprintOf(page);
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
 
     const same = page.locator('[data-verdict="same-pair"]');
     await expect(same).toHaveAttribute('data-tone', 'pass');
@@ -412,7 +412,7 @@ test.describe('each step verdict, read off the computed result', () => {
     await boot(page, 'dark');
     witness(test.info().title, 'checked');
     await page.getByRole('button', { name: 'Make a key pair' }).click();
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
     await page.getByRole('button', { name: 'Change one character for me' }).click();
 
     const verdict = page.locator('[data-verdict="checked"]');
@@ -449,7 +449,7 @@ test.describe('each step verdict, read off the computed result', () => {
   test('Step 4 scopes what a verified signature establishes', async ({ page }) => {
     await boot(page, 'dark');
     await page.getByRole('button', { name: 'Make a key pair' }).click();
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
     await page.getByRole('button', { name: 'Check the signature' }).click();
 
     // THE TRUST BOUNDARY. "A signature is the part that says who" is too strong
@@ -474,7 +474,7 @@ test.describe('each step verdict, read off the computed result', () => {
     // trapdoor, not either scheme, and a beginner who takes it literally ends up
     // believing a signature is a secret in reverse.
     await page.getByRole('button', { name: 'Make a key pair' }).click();
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
     const text = (await page.locator('#app').innerText()).replace(/\s+/g, ' ');
 
     // The page is ALLOWED to use the word while denying it — "it is not
@@ -521,7 +521,7 @@ test.describe('a result always describes inputs that are still on screen', () =>
     await expect(page.locator('#open-lock')).toBeDisabled();
     await expect(page.locator('#step-3 .gate-note')).toContainText('Lock a note in Step 2 first');
 
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
     await expect(page.locator('#check-sig')).toBeEnabled();
     await expect(page.locator('#step-4 .gate-note')).toBeHidden();
   });
@@ -595,7 +595,7 @@ test.describe('a result always describes inputs that are still on screen', () =>
     await boot(page, 'dark');
     await page.getByRole('button', { name: 'Make a key pair' }).click();
     await page.getByRole('button', { name: 'Encrypt the note' }).click();
-    await page.getByRole('button', { name: 'Open it with my private half' }).click();
+    await page.getByRole('button', { name: 'Open it with my private key' }).click();
 
     // The no-op guard. `fill()` dispatches a real `input` event, so the page's
     // listener runs and recomputes the basis — it just recomputes an identical
@@ -617,7 +617,7 @@ test.describe('a result always describes inputs that are still on screen', () =>
     // the line that was supposed to teach it.
     await page.getByRole('button', { name: 'Make a key pair' }).click();
     await page.locator('#message').fill('Hello \u{1F512}');
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
     await page.getByRole('button', { name: 'Change one character for me' }).click();
 
     const given = await page.locator('#checker-text').inputValue();
@@ -632,7 +632,7 @@ test.describe('a result always describes inputs that are still on screen', () =>
   test('the reader can tamper by hand, not only by button', async ({ page }) => {
     await boot(page, 'dark');
     await page.getByRole('button', { name: 'Make a key pair' }).click();
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
     const signed = await page.locator('#checker-text').inputValue();
 
     await page.locator('#checker-text').fill(`${signed} and bring the money.`);
@@ -676,8 +676,8 @@ test.describe('the negative claim: a note that opens does not say who sent it', 
     await page.getByRole('button', { name: 'Make a key pair' }).click();
     const typed = await page.locator('#message').inputValue();
     await page.getByRole('button', { name: 'Encrypt the note' }).click();
-    await page.getByRole('button', { name: 'Open it with my private half' }).click();
-    await page.getByRole('button', { name: 'Let a stranger use my public half' }).click();
+    await page.getByRole('button', { name: 'Open it with my private key' }).click();
+    await page.getByRole('button', { name: 'Let a stranger use my public key' }).click();
 
     const fixture = page.locator('[data-verdict="unattributed"]');
     await expect(fixture).toBeVisible();
@@ -699,7 +699,7 @@ test.describe('the negative claim: a note that opens does not say who sent it', 
     await expect(fixture).toContainText('Every check this page performs reports success');
 
     // The property really is violated: the text that came back is NOT the text
-    // the reader typed, and the reader's own private half opened it.
+    // the reader typed, and the reader's own private key opened it.
     const recovered = await page.locator('#s3-stranger-out .recovered-text').innerText();
     expect(recovered).not.toBe(typed);
     expect(recovered.length).toBeGreaterThan(0);
@@ -709,7 +709,7 @@ test.describe('the negative claim: a note that opens does not say who sent it', 
     const claim = page.locator('#s3-stranger-out .negative-claim');
     await expect(claim).toBeVisible();
     await expect(claim).toContainText('does not tell you who sent it');
-    await expect(claim).toContainText('anyone holding the public half');
+    await expect(claim).toContainText('anyone holding the public key');
     expect(
       await claim.evaluate((node) => node.closest('details') !== null),
       'the negative claim must not sit inside a disclosure'
@@ -725,12 +725,12 @@ test.describe('the negative claim: a note that opens does not say who sent it', 
     await boot(page, 'dark');
     await page.getByRole('button', { name: 'Make a key pair' }).click();
     await page.getByRole('button', { name: 'Encrypt the note' }).click();
-    await page.getByRole('button', { name: 'Let a stranger use my public half' }).click();
+    await page.getByRole('button', { name: 'Let a stranger use my public key' }).click();
     // The hand-off is a real link to a real section, not a sentence about one.
     await expect(page.locator('#s3-stranger-out .handoff a')).toHaveAttribute('href', '#step-4');
     await expect(page.locator('#step-4')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Sign the note with my private half' }).click();
+    await page.getByRole('button', { name: 'Sign the note with my private key' }).click();
     await page.getByRole('button', { name: 'Check the signature' }).click();
     await expect(page.locator('#s4-check-out .claim-note')).toContainText(
       'Now compare this with Step 3'
@@ -739,12 +739,12 @@ test.describe('the negative claim: a note that opens does not say who sent it', 
 });
 
 test.describe('the signing-role question, kept and scoped', () => {
-  test('names the halves, and does not call separate signing keys a mistake', async ({ page }) => {
+  test('names the keys, and does not call separate signing keys a mistake', async ({ page }) => {
     await boot(page, 'dark');
     // It ships shut, like every disclosure here, so a reader opens it first and
     // so does this test. Clicking into a closed <details> would time out on
     // visibility rather than on the assertion, which reads as a broken page.
-    await page.locator('details', { has: page.getByText(/which half did which job/) })
+    await page.locator('details', { has: page.getByText(/which key did which job/) })
       .locator('> summary')
       .click();
     const wrong = page.locator('#check-roles .check-opt', { hasText: 'A separate signing key' });
@@ -759,7 +759,7 @@ test.describe('the signing-role question, kept and scoped', () => {
 
     await page.locator('#check-roles .check-opt').first().click();
     await expect(result).toHaveClass(/pill-ok/);
-    await expect(result).toContainText('The half you keep is the half that signs');
+    await expect(result).toContainText('The key you keep is the key that signs');
   });
 });
 

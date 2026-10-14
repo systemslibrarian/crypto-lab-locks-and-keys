@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Generates a real 2048-bit RSA key pair in the browser, encrypts a short message to the public half with RSA-OAEP and decrypts it with the private half, then uses the same pair for its other job, signing and verifying with RSA-PSS."
+      content="Generates a real 2048-bit RSA key pair in the browser, encrypts a short message to the public key with RSA-OAEP and decrypts it with the private key, then uses the same pair for its other job, signing and verifying with RSA-PSS."
     />
 
     <!-- Social meta -->
@@ -172,16 +172,15 @@
           <h1 class="cl-hero-title">Locks and Keys</h1>
           <p class="cl-hero-sub">Public and private keys · RSA-OAEP · RSA-PSS</p>
           <p class="cl-hero-desc">
-            Make a real key pair, have a note encrypted to the half you hand out, open it with
-            the half you keep — then use the same pair for its other job, signing.
+            Make a real key pair, have a note encrypted to the key you hand out, open it with
+            the key you keep — then sign with the same pair.
           </p>
         </div>
         <aside class="cl-hero-why" aria-label="Why it matters">
           <span class="cl-hero-why-label">WHY IT MATTERS</span>
           <p class="cl-hero-why-text">
-            Almost everything private you do online rests on one idea: that you can publish
-            half of a key and keep the other half. Get the halves the wrong way round and you
-            either hand out the wrong thing or trust the wrong person.
+            Almost everything private you do online rests on one idea: two keys, not one. You
+            publish one and keep the other secret; confusing them is the whole risk.
           </p>
         </aside>
       </div>
@@ -212,7 +211,7 @@
             </p>
             <p>
               Nothing here is simulated — every operation is the browser's own RSA. It is still
-              not production code. One deliberate difference: the private half is generated so
+              not production code. One deliberate difference: the private key is generated so
               that it <em>can</em> be exported, which real systems avoid, because Step 4 needs
               to re-import the same key material under a second algorithm name to show that one
               pair does both jobs.
@@ -247,8 +246,8 @@
         <section id="step-1" class="step" aria-labelledby="s1-head">
           <h2 id="s1-head"><span class="step-n">Step 1</span> Make a pair</h2>
           <p class="step-lede">
-            You are Sam. Press the button; your browser generates two matching halves of one
-            real key pair.
+            You are Sam. Press the button; your browser generates one real key pair — two
+            matching keys.
           </p>
           <div class="controls">
             <button id="make-pair" type="button" class="btn btn-primary">Make a key pair</button>
@@ -260,7 +259,7 @@
         <section id="step-2" class="step" aria-labelledby="s2-head">
           <h2 id="s2-head"><span class="step-n">Step 2</span> Encrypt a note to you</h2>
           <p class="step-lede">
-            Maya wants to send you something private. She has your <strong>public</strong> half
+            Maya wants to send you something private. She has your <strong>public key</strong>
             — the one you hand out — and nothing else. Write what she is sending and encrypt it.
           </p>
           <p class="gate-note" hidden></p>
@@ -277,12 +276,22 @@
             <p id="msg-count" class="counter"></p>
             <p id="limit-note" class="limit-note">
               A key this size encrypts at most <strong data-max-bytes>190</strong> bytes at a
-              time, so this is a note and not a letter. A byte is a unit of stored data; plain
-              letters take one each, an accented letter takes two and an emoji four, which is
-              why the counter can run ahead of the characters you typed. Real systems get around
-              the limit by encrypting a key rather than a message — that is what HPKE Envelope
-              is about.
+              time, so this is a note and not a letter.
             </p>
+            <details class="step-more">
+              <summary>Why the counter can run ahead of what you typed</summary>
+              <div class="step-more-body">
+                <p>
+                  A byte is a unit of stored data; plain letters take one each, an accented
+                  letter takes two and an emoji four, so the count can run ahead of the
+                  characters you typed.
+                </p>
+                <p>
+                  Real systems get around the limit by encrypting a key rather than a message —
+                  that is what HPKE Envelope is about.
+                </p>
+              </div>
+            </details>
             <div class="controls">
               <button id="close-lock" type="button" class="btn btn-primary" data-needs="pair">
                 Encrypt the note
@@ -301,10 +310,10 @@
           </p>
           <p class="gate-note" hidden></p>
 
-          <h3 class="sub-head">Open it with your private half</h3>
+          <h3 class="sub-head">Open it with your private key</h3>
           <div class="controls">
             <button id="open-lock" type="button" class="btn btn-primary" data-needs="lock">
-              Open it with my private half
+              Open it with my private key
             </button>
           </div>
           <div id="s3-out" class="out" role="status" aria-live="polite"></div>
@@ -315,7 +324,7 @@
             <div id="predict-wrong-key" class="check-body"></div>
           </details>
           <p class="sub-lede">
-            This makes a second, completely unrelated pair and hands its private half the same
+            This makes a second, completely unrelated pair and hands its private key the same
             encrypted bytes.
           </p>
           <div class="controls">
@@ -331,13 +340,12 @@
             <div id="predict-stranger" class="check-body"></div>
           </details>
           <p class="sub-lede">
-            Your public half is public, so let somebody else use it. This hands a stranger
-            nothing but your public bytes from Step 1 and lets them encrypt a note of their own
-            choosing. Then you open it with your private half.
+            Your public key is public, so let somebody else use it. A stranger gets nothing but
+            your public bytes from Step 1, and encrypts a note of their own. Then you open it.
           </p>
           <div class="controls">
             <button id="stranger-lock" type="button" class="btn" data-needs="lock">
-              Let a stranger use my public half
+              Let a stranger use my public key
             </button>
           </div>
           <div id="s3-stranger-out" class="out" role="status" aria-live="polite"></div>
@@ -348,8 +356,7 @@
           <h2 id="s4-head"><span class="step-n">Step 4</span> The same pair, a different job</h2>
           <p class="step-lede">
             Step 3 ended with a problem: a note that opens tells you nothing about who sent it.
-            A signature is the answer — and it needs no new keys. Now you are the sender: you
-            sign, and Maya checks.
+            A signature answers it, with no new keys. You sign; Maya checks.
           </p>
           <p class="gate-note" hidden></p>
 
@@ -360,17 +367,16 @@
 
           <div class="controls">
             <button id="sign-msg" type="button" class="btn btn-primary" data-needs="pair">
-              Sign the note with my private half
+              Sign the note with my private key
             </button>
           </div>
           <div id="s4-same-out" class="out" role="status" aria-live="polite"></div>
           <div id="s4-sign-out" class="out" role="status" aria-live="polite"></div>
 
-          <h3 class="sub-head">Check it with the public half</h3>
+          <h3 class="sub-head">Check it with the public key</h3>
           <p class="sub-lede">
             Maya checks with your public bytes and nothing else — the same block you could have
-            printed in a newspaper. Then change the note she is checking and watch what happens:
-            edit the box yourself, or let the button change one character for you.
+            printed in a newspaper. Then change the note she is checking and watch what happens.
           </p>
           <div id="checker-wrap" class="checker" hidden>
             <label class="field" for="checker-text">
@@ -378,8 +384,8 @@
             </label>
             <textarea id="checker-text" rows="3" spellcheck="false"></textarea>
             <p class="checker-note">
-              The signature and the signed note are untouched by this box. Editing it moves the
-              document underneath the signature, which is what tampering actually looks like.
+              Editing this box moves the document underneath the signature, which is what
+              tampering actually looks like. The signature itself is untouched.
             </p>
           </div>
           <div class="controls">
@@ -393,7 +399,7 @@
           <div id="s4-check-out" class="out" role="status" aria-live="polite"></div>
 
           <details class="learner-check">
-            <summary>Quick check — which half did which job?</summary>
+            <summary>Quick check — which key did which job?</summary>
             <div id="check-roles" class="check-body"></div>
           </details>
           <p id="s4-next" class="next-step" hidden></p>
@@ -410,10 +416,10 @@
                 <tr><th scope="col">Job</th><th scope="col">Key used</th><th scope="col">What it does NOT establish</th></tr>
               </thead>
               <tbody>
-                <tr><th scope="row">Encrypt</th><td>The recipient’s public half</td><td>Who sent the note</td></tr>
-                <tr><th scope="row">Decrypt</th><td>The recipient’s private half</td><td>Who sent the note</td></tr>
-                <tr><th scope="row">Sign</th><td>The signer’s private half</td><td>Secrecy, or whether the note is true</td></tr>
-                <tr><th scope="row">Verify</th><td>The signer’s public half</td><td>Whose key it is, unless you already know</td></tr>
+                <tr><th scope="row">Encrypt</th><td>The recipient’s public key</td><td>Who sent the note</td></tr>
+                <tr><th scope="row">Decrypt</th><td>The recipient’s private key</td><td>Who sent the note</td></tr>
+                <tr><th scope="row">Sign</th><td>The signer’s private key</td><td>Secrecy, or whether the note is true</td></tr>
+                <tr><th scope="row">Verify</th><td>The signer’s public key</td><td>Whose key it is, unless you already know</td></tr>
               </tbody>
             </table>
           </div>
@@ -431,10 +437,9 @@
         <section id="pinned-section" class="step step-plain" aria-labelledby="pinned-head">
           <h2 id="pinned-head">How this demo checks its own results</h2>
           <p class="step-lede">
-            Everything above is this page agreeing with itself, which is not worth much alone: a
-            build that got the maths wrong in both directions at once would look just as
-            convincing. So the lab also runs a fixed set of cases published by somebody else, in
-            your browser, on arrival.
+            Everything above is this page agreeing with itself, and a build wrong in both
+            directions at once would look just as convincing. So the lab also runs cases
+            published by somebody else, in your browser, on arrival.
           </p>
           <div id="pinned-out" class="out" role="status" aria-live="polite"></div>
         </section>

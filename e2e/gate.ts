@@ -10,7 +10,7 @@ export const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
  * The three widths every state is scanned at.
  *
  * WIDE is the two-column rendering: the hero's why-box beside its title block,
- * the two halves of the pair side by side, the pinned cases on one row each.
+ * the two keys of the pair side by side, the pinned cases on one row each.
  * PHONE is the single-column one. NARROWEST is 320px, which is the floor WCAG
  * 1.4.10 names and the width at which this page's hazards actually live — a
  * 512-character hex run, two `auto-fit` grids whose automatic minimum size is
@@ -66,7 +66,7 @@ export const NARROWEST = { width: 320, height: 800 };
  *  4. `violations` IS NOT THE WHOLE ORACLE. See `scan`. Every surface that
  *     carries this lab's meaning is a `color-mix()` fill axe files under
  *     `incomplete` rather than judging: all four verdict tones, the retirement
- *     notice, the negative-claim box, both quick-check pills, the two halves of
+ *     notice, the negative-claim box, both quick-check pills, the two keys of
  *     the pair and the hero aside. A violations-only gate measured almost none
  *     of this page.
  *
@@ -389,9 +389,9 @@ export async function boot(page: Page, theme: 'dark'): Promise<void> {
 
   // ── Disclosures ship shut ───────────────────────────────────────────────
   await expect(page.locator('details[open]')).toHaveCount(0);
-  // The on-ramp disclosure, three predictions, the signing-role check, and the
-  // pinned case list.
-  await expect(page.locator('details')).toHaveCount(6);
+  // The on-ramp disclosure, the byte-count aside in Step 2, three predictions,
+  // the signing-role check, and the pinned case list.
+  await expect(page.locator('details')).toHaveCount(7);
   // The role check is rendered on arrival even though it reads as a Step 4
   // afterthought: a question whose options only appear once you have answered
   // the step is a question nobody meets.
@@ -712,7 +712,7 @@ export function expectBaselineNotStale(): void {
  *    arithmetically — which matters here because EVERY surface carrying this
  *    lab's meaning is a `color-mix()` fill axe refuses to resolve: all four
  *    verdict tones, the retirement notice, the negative-claim box, both
- *    quick-check pills, the two halves of the pair, the two job boxes, the
+ *    quick-check pills, the two keys of the pair, the two job boxes, the
  *    hero aside and the shared bar's ink. Everything else in that bucket is a
  *    real result axe simply could not finish — including `aria-prohibited-attr`,
  *    which is where an `aria-label` on a role-less element hides, and
@@ -917,10 +917,10 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await expect(page.locator('#step-2 .gate-note')).toBeHidden();
   // The next-step link is a new paint, and it only exists after a result.
   await expect(page.locator('#s1-next .next-step-link')).toBeVisible();
-  await scanAt('Step 1: a pair exists — both halves badged, the next-step link painted');
+  await scanAt('Step 1: a pair exists — both keys badged, the next-step link painted');
 
-  await reveal(page, 'Show the public half as bytes');
-  await scanAt('Step 1: the public half disclosed as base64');
+  await reveal(page, 'Show the public key as bytes');
+  await scanAt('Step 1: the public key disclosed as base64');
 
   // ── Step 2: the refusals first, so the pass verdict is not what replaces them
   await message.fill('');
@@ -941,7 +941,7 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await expect(page.locator('#msg-count')).not.toHaveClass(/over/);
   await press(page, 'Encrypt the note', 'locked', 'pass');
   await expect(page.locator('#open-lock')).toBeEnabled();
-  await scanAt('Step 2: encrypted — the byte strip and the private-half-unused note');
+  await scanAt('Step 2: encrypted — the byte strip and the private-key-unused note');
 
   // Encrypting again keeps BOTH blocks on screen, which is a layout the single
   // preview never produced: two monospace columns inside a step card.
@@ -962,7 +962,7 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await expect(copyBtn).not.toHaveText(/Copied|Copy failed/, { timeout: 5000 });
 
   // ── Step 3: predictions, then the three experiments ─────────────────────
-  await press(page, 'Open it with my private half', 'opened', 'pass');
+  await press(page, 'Open it with my private key', 'opened', 'pass');
   await scanAt('Step 3: opened — the recovered note quoted back');
 
   await reveal(page, /Predict first/, 0);
@@ -978,13 +978,13 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
   await press(page, 'Try a different private key', 'wrong-key', 'held');
   await scanAt('Step 3: the wrong private key — a CALM refusal, held and not fail');
 
-  await press(page, 'Let a stranger use my public half', 'unattributed', 'alarm');
+  await press(page, 'Let a stranger use my public key', 'unattributed', 'alarm');
   await expect(page.locator('.negative-claim')).toBeVisible();
   await expect(page.locator('#s3-next .next-step-link')).toBeVisible();
   await scanAt('Step 3: OPENED AND UNATTRIBUTED — the negative-claim fixture in alarm');
 
   // ── Step 4: the same pair, a different job ──────────────────────────────
-  await press(page, 'Sign the note with my private half', 'signed', 'pass');
+  await press(page, 'Sign the note with my private key', 'signed', 'pass');
   await expect(page.locator('[data-verdict="same-pair"]')).toHaveAttribute('data-tone', 'pass');
   // The checker copy appears only now, which is a new control and a new label.
   await expect(page.locator('#checker-wrap')).toBeVisible();
@@ -1013,7 +1013,7 @@ export async function driveAllStates(page: Page, theme: string): Promise<void> {
 
   // The signing-role check, which is the one question aimed at the misconception
   // this whole step exists to correct.
-  await reveal(page, /which half did which job/);
+  await reveal(page, /which key did which job/);
   await page.locator('#check-roles .check-opt').nth(1).click();
   await expect(page.locator('#check-roles .check-result')).toHaveClass(/pill-bad/);
   await scanAt('Step 4: the signing-role check answered wrong');

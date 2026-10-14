@@ -68,7 +68,7 @@
     {
       "id": "M3-wrong-key-path-reuses-right-key",
       "verdict": "wrong-key",
-      "what": "Step 3's wrong-key button generates a second pair, prints its genuinely different fingerprint, and then opens the lock with the READER'S OWN private half.",
+      "what": "Step 3's wrong-key button generates a second pair, prints its genuinely different fingerprint, and then opens the lock with the READER'S OWN private key.",
       "why": "The subtlest of the three and the one a careless implementation really produces, because nothing about it looks wrong: a fresh pair IS generated, so the two fingerprints on screen genuinely differ and the panel reads exactly as intended. Only the key handed to `open` is the wrong one. Every unit test stays green - this is a UI wiring defect, not a cryptographic one - so the browser verdict is the only witness.",
       "patches": [
         {
@@ -95,7 +95,7 @@
       "patches": [
         {
           "file": "src/ui/step3.ts",
-          "anchor": "export const NEGATIVE_CLAIM =\n  'A note that opens does not tell you who sent it. RSA-OAEP decryption ' +\n  'establishes nothing at all about the sender: anyone holding the public half ' +\n  'can produce a block this private half opens, and the block carries no record ' +\n  'of who made it.';",
+          "anchor": "export const NEGATIVE_CLAIM =\n  'A note that opens does not tell you who sent it. RSA-OAEP decryption ' +\n  'establishes nothing at all about the sender: anyone holding the public key ' +\n  'can produce a block this private key opens, and the block carries no record ' +\n  'of who made it.';",
           "replacement": "export const NEGATIVE_CLAIM = '';"
         }
       ],
@@ -107,7 +107,7 @@
     {
       "id": "M5-fixture-check-broken",
       "verdict": "unattributed",
-      "what": "The stranger's block is opened with a freshly generated private half instead of the reader's, so the fixture's own decryption fails.",
+      "what": "The stranger's block is opened with a freshly generated private key instead of the reader's, so the fixture's own decryption fails.",
       "why": "The other half of what \u00a74.1d requires: break a check inside the fixture and the assertion that everything is green must fail. The page then renders THE FIXTURE DID NOT HOLD, which is the honest outcome - a fixture whose own checks fail is demonstrating the mechanism working rather than its limit, and must never be allowed to read as a demonstration of the limitation.",
       "patches": [
         {

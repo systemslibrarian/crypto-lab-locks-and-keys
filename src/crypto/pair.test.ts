@@ -5,7 +5,7 @@
  * the two properties that CAN be asserted over random pairs are asserted
  * instead, and asserted over many pairs rather than one:
  *
- *   - ROUND-TRIP: what one half closes, the other half opens, byte for byte.
+ *   - ROUND-TRIP: what one key closes, the other opens, byte for byte.
  *   - CROSS-PAIR REJECTION: what one pair closes, a DIFFERENT pair never opens;
  *     and a signature from one pair never verifies under another.
  *
@@ -15,7 +15,7 @@
  * mutation `mutations/mutations.json` applies. Cross-pair rejection fails both.
  *
  * Neither is a check against the publication; `vectors.test.ts` is. The split is
- * deliberate and both halves are needed.
+ * deliberate and both keys are needed.
  */
 import { describe, expect, it } from 'vitest';
 import { webcrypto } from 'node:crypto';
@@ -84,7 +84,7 @@ describe('a pair is one pair, used both ways round', () => {
   });
 });
 
-describe('round-trip: what the public half closes, the private half opens', () => {
+describe('round-trip: what the public key closes, the private key opens', () => {
   it(
     'returns the exact message, over several pairs and several messages',
     async () => {
@@ -208,12 +208,12 @@ describe('cross-pair rejection: a second pair never opens the first pair lock', 
   );
 });
 
-describe('the public half, alone, is enough to close a lock and check a signature', () => {
+describe('the public key, alone, is enough to close a lock and check a signature', () => {
   it(
     'locks and verifies using nothing but the exported public bytes',
     async () => {
       // This is the negative claim's mechanism, asserted at the crypto layer: a
-      // party holding ONLY these bytes can produce a ciphertext the private half
+      // party holding ONLY these bytes can produce a ciphertext the private key
       // opens. Nothing about that ciphertext records who made it.
       const p = await makePair();
       const strangerLock = await importPublicForLocking(p.publicKeyBytes);

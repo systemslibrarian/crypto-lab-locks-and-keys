@@ -548,7 +548,7 @@ export async function auditContrast(
       // that subtree — so the `display`/rect tests above all pass for text
       // that paints nothing. `checkVisibility()` catches it. This page has the
       // shape five times over: the quick check and the four byte disclosures
-      // (the public half, the locked block, the two key exports and the whole
+      // (the public key, the locked block, the two key exports and the whole
       // signature) are all <details> that ship shut, and each hides hundreds of
       // characters of hex. The gate opens them by clicking their <summary>,
       // which is the route a reader has, rather than setting `.open` from

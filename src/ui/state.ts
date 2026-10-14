@@ -37,7 +37,7 @@ export interface LabState {
   checkerText: string | null;
   /** The second, unrelated pair Step 3 generates to try the wrong key. */
   otherPair: Pair | null;
-  /** The ciphertext Step 3's stranger produced with the public half alone. */
+  /** The ciphertext Step 3's stranger produced with the public key alone. */
   fromStranger: Locked | null;
   /** What the stranger wrote in it — the reader never typed this. */
   strangerText: string;

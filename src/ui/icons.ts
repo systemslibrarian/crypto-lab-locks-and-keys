@@ -46,7 +46,7 @@ export const closedLock = (): SVGElement =>
 export const openLock = (): SVGElement =>
   shell([{ d: BODY }, { d: 'M8 11V7a4 4 0 0 1 8 0v2' }], 'glyph-open');
 
-/** A key — the private half. */
+/** A key — the private one. */
 export const key = (): SVGElement =>
   shell(
     [

@@ -21,7 +21,7 @@ export function whyNotLockable(text: string): string | null {
 }
 
 /**
- * Close the lock: encrypt to the public half.
+ * Close the lock: encrypt to the public key.
  *
  * NOTE WHAT IS NOT A PARAMETER. There is no private key here, and none is
  * needed — that is the claim Step 2 makes and this signature is where it is
@@ -48,7 +48,7 @@ export async function close(lockWith: CryptoKey, text: string): Promise<Locked> 
 }
 
 /**
- * Open the lock: decrypt with the private half.
+ * Open the lock: decrypt with the private key.
  *
  * Returns a refusal rather than throwing, because a refusal here is the correct
  * outcome of Step 3's second half and must not reach the UI as an error. See

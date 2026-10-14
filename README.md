@@ -1,8 +1,8 @@
 # Locks and Keys
 
 Public and private keys, shown rather than asserted. A real 2048-bit RSA key pair is
-generated in your browser; a note is encrypted to the public half with **RSA-OAEP**, opened with
-the private half, an unrelated key fails to open it — and then **the same pair does its other
+generated in your browser; a note is encrypted to the public key with **RSA-OAEP**, opened with
+the private key, an unrelated key fails to open it — and then **the same pair does its other
 job**, signing and verifying with **RSA-PSS**.
 
 **Live demo:** <https://systemslibrarian.github.io/crypto-lab-locks-and-keys/>
@@ -11,8 +11,8 @@ job**, signing and verifying with **RSA-PSS**.
 
 ## What It Is
 
-A beginner's on-ramp to the single idea the rest of modern cryptography is built on: that you
-can publish half of a key and keep the other half.
+A beginner's on-ramp to the single idea the rest of modern cryptography is built on: that a
+key pair is two different keys, one of which you can publish while keeping the other secret.
 
 The exact primitives are **RSAES-OAEP** (RFC 8017 §7.1) with SHA-256 and MGF1-SHA-256, and
 **RSASSA-PSS** (RFC 8017 §8.1) with SHA-256 and a 32-byte salt, both called through the
@@ -29,9 +29,9 @@ no storage — the only thing this page writes to `localStorage` is the theme pi
 page destroys the key pair.
 
 **Not production crypto — a teaching demo.** One specific thing here is deliberately not what
-a careful system would do: the private half is generated `extractable: true`. That is needed
-because WebCrypto binds a key to an algorithm, so the private half has to be exported as PKCS#8
-and re-imported under `RSA-PSS` for Step 4 to use one pair for both jobs. (The *public*-half
+a careful system would do: the private key is generated `extractable: true`. That is needed
+because WebCrypto binds a key to an algorithm, so the private key has to be exported as PKCS#8
+and re-imported under `RSA-PSS` for Step 4 to use one pair for both jobs. (The *public* key
 comparison Step 4 shows a reader needs no private export at all.) A system handling real keys
 would normally mark them non-extractable, and some deliberately do export them — to escrow or
 back up a key, for instance — so this is a precaution a design can trade away knowingly, not a
@@ -42,18 +42,18 @@ rule the maths imposes. The page says as much in its own words, not just here.
 The lab declares one **negative claim**, and demonstrates it rather than disclaiming it:
 
 > A note that opens does not tell you who sent it. RSA-OAEP decryption establishes nothing at
-> all about the sender: anyone holding the public half can produce a block this private half
+> all about the sender: anyone holding the public key can produce a block this private key
 > opens, and the block carries no record of who made it.
 
 Step 3's third button reaches a state where **every check the page performs reports success and
 the property is violated anyway** — a stranger holding nothing but your public bytes writes a
-message you never typed, and your own private half opens it perfectly. The verdict reads
+message you never typed, and your own private key opens it perfectly. The verdict reads
 `OPENED — AND UNATTRIBUTED`. There is no failure code to show, because there is no check there
 that could fail: the encrypted block has no sender field in it. The absence of a code is the
 exhibit. That state is also the reason Step 4 exists, and the page hands you straight to it.
 
 Step 4 then draws the *second* boundary, in the state where a reader is most likely to over-read
-a result: a verified signature says the signature matches this note under this public half, and
+a result: a verified signature says the signature matches this note under this public key, and
 connecting that to a person needs the separate knowledge that the key is theirs. The page says
 so beside the VERIFIED verdict, not in a footnote.
 
@@ -71,21 +71,21 @@ Two things the lab is also explicit about in-page:
 ## Exhibits
 
 1. **Step 1 — Make a pair.** One button, one real `crypto.subtle.generateKey` at 2048 bits. The
-   public half is shown and copyable; the private half is described and never displayed
+   public key is shown and copyable; the private key is described and never displayed
    anywhere on the page. A short fingerprint labels the pair so you can tell it from another.
-2. **Step 2 — Encrypt a note to you.** Maya has your **public** half and nothing else. The
+2. **Step 2 — Encrypt a note to you.** Maya has your **public key** and nothing else. The
    result is one 256-byte block of nothing readable, and it is 256 bytes for any note short
    enough to fit — so the size of the block says nothing about the length of the note. Press it
    twice and both blocks stay on screen side by side: completely different bytes, same note,
    because a fresh random seed goes into every encryption. The panel states, beside the result,
-   that the private half was not used and was not needed.
-3. **Step 3 — Open it.** The private half returns your note character for character. Then a
+   that the private key was not used and was not needed.
+3. **Step 3 — Open it.** The private key returns your note character for character. Then a
    **second, freshly generated** pair tries the same bytes and fails — painted *calmly*, because
    a lock holding shut against the wrong key is the one thing a lock is for, not an error. Then
    the negative-claim fixture above.
 4. **Step 4 — The same pair, a different job.** The panel first **proves** the pair is the one
-   from Step 1, by exporting the public half from the encrypting handle and the verifying handle
-   and comparing the bytes. Then the private half signs, the public half verifies, and the
+   from Step 1, by exporting the public key from the encrypting handle and the verifying handle
+   and comparing the bytes. Then the private key signs, the public key verifies, and the
    reader edits the note the checker is given — by hand, or with one button — and watches it
    refuse, with the changed character marked. The readable note sits beside its signature
    throughout, so "a signature does not hide the message" is shown rather than claimed. This is
@@ -103,8 +103,8 @@ Two things the lab is also explicit about in-page:
 
 WebCrypto binds a key to an algorithm: a key generated for `RSA-OAEP` cannot be handed to
 `RSA-PSS`, and asking it to sign throws. A lab that reached for two `generateKey` calls would
-make Step 4's whole claim false. So one pair is generated, the private half is exported as
-PKCS#8 and the public half as SPKI, and both are re-imported under `RSA-PSS`. WebCrypto writes
+make Step 4's whole claim false. So one pair is generated, the private key is exported as
+PKCS#8 and the public key as SPKI, and both are re-imported under `RSA-PSS`. WebCrypto writes
 the `rsaEncryption` algorithm identifier for both schemes, so the two SPKI exports are
 byte-identical — and `makePair()` asserts that at the moment the pair is made rather than
 trusting it, which means a future edit reaching for a second `generateKey` throws there instead
@@ -115,7 +115,7 @@ of letting the page go on claiming something untrue.
 An earlier version of this lab called Step 4 *the same pair, backwards*, and that phrasing was
 the one genuinely misleading thing in it. It is gone from the page, the metadata and this file.
 
-What is true is that one pair does both jobs and the halves swap roles: public encrypts /
+What is true is that one pair does both jobs and the keys swap roles: public encrypts /
 private decrypts, then private signs / public verifies. What is **not** true is that signing is
 encryption run backwards. RSAES-OAEP and RSASSA-PSS are different constructions with different
 padding, and PSS verification does not decrypt a signature to recover a message — it rebuilds an
@@ -134,9 +134,9 @@ the false mechanism claim is gone, and a `claims` test asserts the page does not
 - **Use it** as the first thing someone meets about public-key cryptography — it is step 2 of
   the catalog's "Start here" path, after *what a hash is*.
 - **Use it** to settle the signing question. "One pair does both jobs" is a sentence people nod
-  at and do not believe; Step 4 makes it a measurement by exporting the public half twice.
+  at and do not believe; Step 4 makes it a measurement by exporting the public key twice.
 - **Do NOT use it** as a guide to building anything. Encrypting a message directly to someone's
-  RSA public key is not how working systems do this — they encrypt a *key* to the public half
+  RSA public key is not how working systems do this — they encrypt a *key* to the public key
   and the message to that key, which is what **HPKE Envelope** shows. The 190-byte ceiling you
   hit in Step 2 is exactly why.
 - **Do NOT use it** to choose a key size, a padding mode, or a curve. **Iron Letter** compares
@@ -151,10 +151,10 @@ the false mechanism claim is gone, and a `claims` test asserts the page does not
 <https://systemslibrarian.github.io/crypto-lab-locks-and-keys/>
 
 Press one button and work down the page. You can: generate a pair; lock a note to the public
-half and watch the ciphertext change on every press; open it with the private half; generate an
-unrelated pair and watch it fail; let a stranger use your public half and discover that a
-message that opens proves nothing about who sent it; sign with the private half and check with
-the public half alone; change one character and watch the check refuse; and read the twelve
+key and watch the ciphertext change on every press; open it with the private key; generate an
+unrelated pair and watch it fail; let a stranger use your public key and discover that a
+message that opens proves nothing about who sent it; sign with the private key and check with
+the public key alone; change one character and watch the check refuse; and read the twelve
 pinned cases that ran before you arrived.
 
 Every long value — the public key, the locked block, both key exports, the whole signature — is
@@ -163,7 +163,7 @@ click away.
 
 ## What Can Go Wrong
 
-- **Handing out the wrong half.** The two halves are not interchangeable, and the page keeps them
+- **Handing out the wrong key.** The two keys are not interchangeable, and the page keeps them
   visually distinct throughout for that reason. Publishing a private key is unrecoverable: every
   message ever locked to its partner is open, including ones recorded years ago.
 - **Believing a message that decrypts.** The failure this lab is built to prevent. Decryption is
