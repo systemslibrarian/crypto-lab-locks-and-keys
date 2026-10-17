@@ -172,16 +172,14 @@
           <h1 class="cl-hero-title">Locks and Keys</h1>
           <p class="cl-hero-sub">Public and private keys · RSA-OAEP · RSA-PSS</p>
           <p class="cl-hero-desc">
-            Make a real key pair, have a note encrypted to the key you hand out, open it with
-            the key you keep — then sign with the same pair.
+            Make a key pair. Encrypt and open a note. Then sign it and check the signature.
           </p>
         </div>
         <aside class="cl-hero-why" aria-label="Why it matters">
           <span class="cl-hero-why-label">WHY IT MATTERS</span>
           <p class="cl-hero-why-text">
-            Almost everything private you do online rests on public-key cryptography, which
-            uses two related keys: a public key you can share and a private key you keep
-            secret.
+            Public-key cryptography uses two separate, mathematically related keys:
+            a public key you share and a private key you keep secret.
           </p>
         </aside>
       </div>
@@ -189,9 +187,8 @@
       <section class="intro" aria-labelledby="intro-head">
         <h2 id="intro-head">Start here</h2>
         <p class="intro-lead">
-          How can somebody send you a private note without the two of you first agreeing on a
-          password? You publish a <strong>public key</strong> anyone may encrypt to, and keep
-          the matching <strong>private key</strong> secret. Four steps, no maths.
+          Can someone send you a private note without first sharing a password?
+          Try it in four steps. No maths needed.
         </p>
         <p class="intro-safety">
           Real cryptography, running in your browser. Use example text, not real secrets.
@@ -200,28 +197,23 @@
           <summary>Why RSA here, and what this demo is not</summary>
           <div class="intro-more-body">
             <p>
-              The padlock story is <em>literally</em> true for RSA, which is why this lab uses
-              it: you encrypt straight to somebody's public key and there is nothing else on
-              screen. Most of the web today uses a different shape — elliptic curves — where
-              encrypting to someone needs a throwaway key pair and a key-derivation step
-              first. That is better in practice and one idea too many for a first encounter.
+              RSA-OAEP lets you encrypt a short note directly with a public key.
+              Modern protocols often use public-key operations to establish a shared key,
+              then encrypt messages with symmetric cryptography.
               <a href="https://systemslibrarian.github.io/crypto-lab-iron-letter/" target="_blank" rel="noopener noreferrer">Iron Letter</a>
               compares the two directly, and
               <a href="https://systemslibrarian.github.io/crypto-lab-hpke-envelope/" target="_blank" rel="noopener noreferrer">HPKE Envelope</a>
-              shows how it is actually packaged.
+              shows a hybrid encryption construction.
             </p>
             <p>
-              Nothing here is simulated — every operation is the browser's own RSA. It is still
-              not production code. One deliberate difference: the private key is generated so
-              that it <em>can</em> be exported, which real systems avoid, because Step 4 needs
-              to re-import the same key material under a second algorithm name to show that one
-              pair does both jobs.
+              This teaching demo uses real browser cryptography. It makes the private key
+              exportable so Step 4 can reuse the RSA pair for signing. Production systems
+              commonly restrict key export and use separate pairs for encryption and signing.
             </p>
             <p>
-              The numbers underneath — how the pair is generated and why it works — are kept off
-              this page on purpose. That is
+              For the mathematics behind RSA, visit
               <a href="https://systemslibrarian.github.io/crypto-lab-rsa-educational/" target="_blank" rel="noopener noreferrer">Educational RSA</a>,
-              which exists to show exactly the layer this one hides.
+              for a step-by-step explanation.
             </p>
           </div>
         </details>
@@ -247,8 +239,7 @@
         <section id="step-1" class="step" aria-labelledby="s1-head">
           <h2 id="s1-head"><span class="step-n">Step 1</span> Make a pair</h2>
           <p class="step-lede">
-            You are Sam. Press the button; your browser generates one real key pair — two
-            matching keys.
+            You are Sam. Generate your public key and matching private key.
           </p>
           <div class="controls">
             <button id="make-pair" type="button" class="btn btn-primary">Make a key pair</button>
@@ -260,8 +251,7 @@
         <section id="step-2" class="step" aria-labelledby="s2-head">
           <h2 id="s2-head"><span class="step-n">Step 2</span> Encrypt a note to you</h2>
           <p class="step-lede">
-            Maya wants to send you something private. She has your <strong>public key</strong>
-            — the one you hand out — and nothing else. Write what she is sending and encrypt it.
+            Maya has only your <strong>public key</strong>. Write her note, then encrypt it.
           </p>
           <p class="gate-note" hidden></p>
           <div class="controls controls-stack">
@@ -276,20 +266,18 @@
             >Meet me at the north gate at six.</textarea>
             <p id="msg-count" class="counter"></p>
             <p id="limit-note" class="limit-note">
-              A key this size encrypts at most <strong data-max-bytes>190</strong> bytes at a
-              time, so this is a note and not a letter.
+              This RSA-OAEP setup has a <strong data-max-bytes>190</strong>-byte message limit.
             </p>
             <details class="step-more">
               <summary>Why the counter can run ahead of what you typed</summary>
               <div class="step-more-body">
                 <p>
-                  A byte is a unit of stored data; plain letters take one each, an accented
-                  letter takes two and an emoji four, so the count can run ahead of the
-                  characters you typed.
+                  The limit counts UTF-8 bytes, not characters. ASCII letters use one byte;
+                  accented letters and emoji can use several.
                 </p>
                 <p>
-                  Real systems get around the limit by encrypting a key rather than a message —
-                  that is what HPKE Envelope is about.
+                  Hybrid encryption establishes a shared key and uses it to encrypt longer
+                  messages. Explore that in HPKE Envelope.
                 </p>
               </div>
             </details>
@@ -306,8 +294,7 @@
         <section id="step-3" class="step" aria-labelledby="s3-head">
           <h2 id="s3-head"><span class="step-n">Step 3</span> Open it — and see what opening proves</h2>
           <p class="step-lede">
-            Three experiments. Guess before each one; being wrong is the fastest way to
-            remember it.
+            Try your key, a different key, and a note from a stranger.
           </p>
           <p class="gate-note" hidden></p>
 
@@ -325,8 +312,7 @@
             <div id="predict-wrong-key" class="check-body"></div>
           </details>
           <p class="sub-lede">
-            This makes a second, completely unrelated pair and hands its private key the same
-            encrypted bytes.
+            Can an unrelated private key open the same encrypted note?
           </p>
           <div class="controls">
             <button id="try-wrong-key" type="button" class="btn" data-needs="lock">
@@ -335,14 +321,13 @@
           </div>
           <div id="s3-wrong-out" class="out" role="status" aria-live="polite"></div>
 
-          <h3 class="sub-head">And now the part nobody expects</h3>
+          <h3 class="sub-head">Can a stranger send you a note?</h3>
           <details class="learner-check predict">
             <summary>Predict first — optional</summary>
             <div id="predict-stranger" class="check-body"></div>
           </details>
           <p class="sub-lede">
-            Your public key is public, so let somebody else use it. A stranger gets nothing but
-            your public bytes from Step 1, and encrypts a note of their own. Then you open it.
+            A stranger encrypts their own note using only your public key. Try opening it.
           </p>
           <div class="controls">
             <button id="stranger-lock" type="button" class="btn" data-needs="lock">
@@ -356,8 +341,8 @@
         <section id="step-4" class="step" aria-labelledby="s4-head">
           <h2 id="s4-head"><span class="step-n">Step 4</span> The same pair, a different job</h2>
           <p class="step-lede">
-            Step 3 ended with a problem: a note that opens tells you nothing about who sent it.
-            A signature answers it, with no new keys. You sign; Maya checks.
+            Decryption does not identify the sender. Sign with your private key;
+            Maya checks with your public key. She must also know that key is yours.
           </p>
           <p class="gate-note" hidden></p>
 
@@ -376,8 +361,7 @@
 
           <h3 class="sub-head">Check it with the public key</h3>
           <p class="sub-lede">
-            Maya checks with your public bytes and nothing else — the same block you could have
-            printed in a newspaper. Then change the note she is checking and watch what happens.
+            Check the signature, then edit the note and check again.
           </p>
           <div id="checker-wrap" class="checker" hidden>
             <label class="field" for="checker-text">
@@ -385,8 +369,7 @@
             </label>
             <textarea id="checker-text" rows="3" spellcheck="false"></textarea>
             <p class="checker-note">
-              Editing this box moves the document underneath the signature, which is what
-              tampering actually looks like. The signature itself is untouched.
+              Editing changes the note, not its signature.
             </p>
           </div>
           <div class="controls">
@@ -427,8 +410,7 @@
 
           <h3 class="sub-head">Three questions</h3>
           <p class="sub-lede">
-            No score, and nothing is recorded. If one of these is awkward, the explanation is
-            the point.
+            Check your understanding. No score or saved answers.
           </p>
           <div id="scenario-1" class="scenario"></div>
           <div id="scenario-2" class="scenario"></div>
@@ -438,9 +420,7 @@
         <section id="pinned-section" class="step step-plain" aria-labelledby="pinned-head">
           <h2 id="pinned-head">How this demo checks its own results</h2>
           <p class="step-lede">
-            Everything above is this page agreeing with itself, and a build wrong in both
-            directions at once would look just as convincing. So the lab also runs cases
-            published by somebody else, in your browser, on arrival.
+            On load, your browser checks published test cases, including ones it must reject.
           </p>
           <div id="pinned-out" class="out" role="status" aria-live="polite"></div>
         </section>

@@ -63,18 +63,16 @@ function showPair(): void {
       el('p', { class: 'half-badge half-badge-share' }, ['Shareable']),
       p('Give this to anybody. Maya needs it to send you a private note.', 'half-line'),
       p(
-        'It encrypts notes to you, and it verifies signatures you make. It can do neither ' +
-          'of the other two jobs: it cannot decrypt and it cannot sign.',
+        'Encrypts notes to you and verifies signatures you make. Cannot decrypt or sign.',
         'half-note'
       ),
     ]),
     el('div', { class: 'half half-private' }, [
       el('p', { class: 'half-head' }, [key(), el('span', {}, ['The private key'])]),
       el('p', { class: 'half-badge half-badge-keep' }, ['Stays with you']),
-      p('Never give this to anybody. It is the only thing that opens notes sent to you.', 'half-line'),
+      p('Keep this secret. It opens notes encrypted to your public key.', 'half-line'),
       p(
-        'It decrypts, and it signs. It is not shown anywhere on this page — that is the ' +
-          'point of it.',
+        'It decrypts, and it signs. Never displayed on this page.',
         'half-note'
       ),
     ]),
@@ -88,17 +86,15 @@ function showPair(): void {
       glyph: 'tick',
       headline: 'A PAIR EXISTS',
       detail: [
-        `Two matching keys, one ${MODULUS_BITS}-bit pair, made in your browser a moment ago.`,
-        `This pair goes by ${pair.fingerprint} on this page, so you can tell it from another one later.`,
+        `Two related keys: one ${MODULUS_BITS}-bit RSA pair, generated in your browser.`,
+        `Pair label: ${pair.fingerprint}.`,
       ],
     },
     [
       keys,
       p(
-        `${pair.fingerprint} is a short label for the public key, not a security check — ` +
-          'four bytes is far too few for that, and matching labels would never be grounds ' +
-          'for trusting a key. It is here so Step 3 can show you a different pair and Step 4 ' +
-          'can show you the same one.',
+        `${pair.fingerprint} is a four-byte label, not an authentication check. ` +
+          'Matching labels are not enough to trust a key.',
         'aside-note'
       ),
       disclosure('Show the public key as bytes', [

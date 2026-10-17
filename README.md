@@ -11,8 +11,12 @@ job**, signing and verifying with **RSA-PSS**.
 
 ## What It Is
 
-A beginner's on-ramp to the single idea the rest of modern cryptography is built on: that a
-key pair is two related keys: a public key you can share and a private key you keep secret.
+A beginner's introduction to public-key cryptography. A key pair consists of two separate,
+mathematically related keys: a public key you can share and a private key you keep secret.
+
+The page leads with four short, hands-on steps. Optional explanations cover why this demo
+uses RSA, its message-size limit, and its published test cases. Key roles and security
+limitations remain beside the results they qualify.
 
 The exact primitives are **RSAES-OAEP** (RFC 8017 §7.1) with SHA-256 and MGF1-SHA-256, and
 **RSASSA-PSS** (RFC 8017 §8.1) with SHA-256 and a 32-byte salt, both called through the
