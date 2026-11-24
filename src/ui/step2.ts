@@ -66,11 +66,12 @@ export function mountStep2(): void {
     }
     // Keep the previous block only while the note is unchanged, so the
     // comparison is honestly about the randomness and not about two notes.
-    state.previousLocked =
-      state.locked && state.lockedOver === input.value ? state.locked : null;
-    state.message = input.value;
-    state.locked = await close(pair.lockWith, input.value);
-    state.lockedOver = input.value;
+    const message = input.value;
+    const locked = await close(pair.lockWith, message);
+    if (state.pair !== pair || state.message !== message) return;
+    state.previousLocked = state.lockedOver === message ? state.locked : null;
+    state.locked = locked;
+    state.lockedOver = message;
     showLocked();
     settled();
   });
@@ -109,8 +110,8 @@ function showLocked(): void {
             'both of them decrypt to that same note. A fresh random value goes into every ' +
             'encryption, so an eavesdropper who sees the same note sent twice cannot even ' +
             'tell it was the same note.'
-          : 'Both encryptions produced IDENTICAL bytes. That should be impossible here, and ' +
-            'it would mean the randomness has failed.',
+          : 'Both encryptions produced IDENTICAL bytes. A random seed can repeat, but it is ' +
+            'extremely unlikely with a 32-byte seed. This run did not show different ciphertexts.',
         differs ? 'claim-note' : 'negative-claim'
       )
     );

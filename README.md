@@ -96,7 +96,8 @@ Two things the lab is also explicit about in-page:
    the panel that earns the lab its place: most newcomers believe signing is a separate
    mechanism with its own keys.
 5. **How this demo checks its own results.** Twelve pinned cases run in your browser on
-   arrival. Four of them are cases the construction is **required to refuse**, and the page
+   arrival. An unavailable check is reported separately from a cryptographic refusal.
+   Four of them are cases the construction is **required to refuse**, and the page
    prints that figure by counting the fixture rather than quoting it.
 6. **A recap and three questions.** A table of which key does which job and what each result
    does *not* establish, then three scenario questions with no score attached. Short optional
@@ -221,7 +222,7 @@ catalog's `tools/playwright-ports.json`.
 
 ## Build & Verify
 
-**30 unit tests** (4 files) + **28 claims tests** + **3 accessibility drives**.
+**31 unit tests** (4 files) + **29 claims tests** + **3 accessibility drives**.
 
 **Correctness, in two independent halves.** A freshly generated key pair has no published answer
 to compare against, so:

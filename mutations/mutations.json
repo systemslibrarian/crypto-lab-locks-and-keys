@@ -78,8 +78,8 @@
         },
         {
           "file": "src/ui/step3.ts",
-          "anchor": "      state.otherPair = await makePair();\n      const result = await open(state.otherPair.openWith, locked.bytes);",
-          "replacement": "      state.otherPair = await makePair();\n      const result = await open(pairForWrongKeyPath().openWith, locked.bytes);"
+          "anchor": "      const otherPair = await makePair();\n      const result = await open(otherPair.openWith, locked.bytes);",
+          "replacement": "      const otherPair = await makePair();\n      const result = await open(pairForWrongKeyPath().openWith, locked.bytes);"
         }
       ],
       "owningTest": "Step 3 wrong key is refused CALMLY, and the page names the cause",
@@ -112,8 +112,8 @@
       "patches": [
         {
           "file": "src/ui/step3.ts",
-          "anchor": "      state.fromStranger = await close(strangerHandle, state.strangerText);\n      const result = await open(pair.openWith, state.fromStranger.bytes);",
-          "replacement": "      state.fromStranger = await close(strangerHandle, state.strangerText);\n      const result = await open((await makePair()).openWith, state.fromStranger.bytes);"
+          "anchor": "      const fromStranger = await close(strangerHandle, state.strangerText);\n      const result = await open(pair.openWith, fromStranger.bytes);",
+          "replacement": "      const fromStranger = await close(strangerHandle, state.strangerText);\n      const result = await open((await makePair()).openWith, fromStranger.bytes);"
         }
       ],
       "owningTest": "every check passes, and the message is unattributed anyway",

@@ -9,18 +9,38 @@
  * REFUSE: damaged padding and damaged signatures that a careless build would
  * accept. The summary counts both together, and each row says which kind it is.
  */
-import { runPinned } from '../crypto/pinned';
-import { PINNED_CASE_COUNT, VECTOR_SOURCE } from '../crypto/vectors';
+import { runPinned, type PinnedRun } from '../crypto/pinned';
+import { VECTOR_SOURCE } from '../crypto/vectors';
 import { disclosure, el, p } from './dom';
 import { render, slot } from './verdict';
+
+// The independent expected roster prevents a missing or duplicated case from shrinking the denominator.
+const expectedCases = new Set([
+  'OAEP 1', 'OAEP 3', 'OAEP 5', 'OAEP 11', 'OAEP 12', 'OAEP 13',
+  'PSS 1', 'PSS 3', 'PSS 5', 'PSS 62', 'PSS 73', 'PSS 85',
+]);
 
 export async function mountPinned(): Promise<void> {
   const host = document.getElementById('pinned-out') as HTMLElement;
   // The pinned set is fixed at build time, so nothing can retire this verdict.
   slot('pinned', host, () => 'pinned', 'Reload the page to run the pinned cases again.');
 
-  const run = await runPinned();
-  const allAgreed = run.agreed === run.total && run.total === PINNED_CASE_COUNT;
+  let run: PinnedRun;
+  try {
+    run = await runPinned();
+  } catch {
+    render('pinned', {
+      marker: 'pinned',
+      tone: 'alarm',
+      glyph: 'warn',
+      headline: 'REFERENCE CHECK UNAVAILABLE',
+      detail: ['The reference checks could not finish in this browser. Reload to retry.'],
+    });
+    return;
+  }
+  const labels = new Set(run.results.map((result) => result.label));
+  const complete = run.total === expectedCases.size && [...expectedCases].every((label) => labels.has(label));
+  const allAgreed = complete && run.agreed === run.total;
 
   const rows = el(
     'ol',
@@ -59,11 +79,11 @@ export async function mountPinned(): Promise<void> {
           marker: 'pinned',
           tone: 'alarm',
           glyph: 'warn',
-          headline: `${run.agreed} OF ${run.total} AGREE`,
-          detail: [
+          headline: complete ? `${run.agreed} OF ${run.total} AGREE` : 'REFERENCE SET INCOMPLETE',
+          detail: complete ? [
             'At least one pinned case did not come out the way the publication says it ' +
               'should. Do not trust anything else on this page until that is explained.',
-          ],
+          ] : [`Expected ${expectedCases.size} named cases. Inspect the rows below before drawing a conclusion.`],
         },
     [
       // The case list goes BEHIND a disclosure. Twelve rows read as a second

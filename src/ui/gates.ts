@@ -31,11 +31,11 @@ export const NEEDS: Record<Need, Prerequisite> = {
     todo: 'Make a key pair in Step 1 first.',
   },
   lock: {
-    holds: () => state.locked !== null,
+    holds: () => state.locked !== null && state.lockedOver === state.message,
     todo: 'Lock a note in Step 2 first — there is nothing to open yet.',
   },
   signature: {
-    holds: () => state.signature !== null,
+    holds: () => state.signature !== null && state.signature.over === state.message,
     todo: 'Sign the note first, with the button above.',
   },
 };

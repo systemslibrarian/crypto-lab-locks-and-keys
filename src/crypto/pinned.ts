@@ -47,15 +47,17 @@ async function runOaep(key: CryptoKey, c: OaepCase): Promise<CaseResult> {
       new Uint8Array(await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, key, fromHex(c.ct)))
     );
     observed = opened === c.pt ? 'opened to the published plaintext' : 'opened to the WRONG bytes';
-  } catch {
-    observed = 'refused to open';
+  } catch (error) {
+    observed = error instanceof DOMException && error.name === 'OperationError'
+      ? 'refused to open'
+      : 'could not check it at all';
   }
-  const agreed = c.mustSucceed ? opened === c.pt : opened === null;
+  const agreed = c.mustSucceed ? opened === c.pt : observed === 'refused to open';
   return { label: `OAEP ${c.tcId}`, tcId: c.tcId, why: c.why, mustSucceed: c.mustSucceed, agreed, observed };
 }
 
 async function runPss(key: CryptoKey, c: PssCase): Promise<CaseResult> {
-  let verified = false;
+  let verified: boolean | null = null;
   let observed: string;
   try {
     verified = await crypto.subtle.verify(

@@ -11,7 +11,7 @@
  * them — a build that opens whatever it is handed round-trips perfectly and fails
  * these.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { webcrypto } from 'node:crypto';
 import { runPinned } from './pinned';
 import {
@@ -37,6 +37,21 @@ describe('pinned cases from Project Wycheproof', () => {
     expect(run.agreed).toBe(run.total);
     expect(run.total).toBe(PINNED_CASE_COUNT);
   }, 60_000);
+
+  it('reports unavailable verification as missing evidence even for negative cases', async () => {
+    const unavailable = new DOMException('Unavailable in this test', 'InvalidAccessError');
+    const verify = vi.spyOn(crypto.subtle, 'verify').mockRejectedValue(unavailable);
+    const decrypt = vi.spyOn(crypto.subtle, 'decrypt').mockRejectedValue(unavailable);
+    try {
+      const run = await runPinned();
+      expect(run.total).toBe(12);
+      expect(run.agreed).toBe(0);
+      expect(run.results.every((row) => row.observed === 'could not check it at all')).toBe(true);
+    } finally {
+      verify.mockRestore();
+      decrypt.mockRestore();
+    }
+  });
 
   it('pins cases of both kinds, so a refuse-everything build cannot pass', () => {
     // Asserted rather than assumed: a regeneration that happened to select only

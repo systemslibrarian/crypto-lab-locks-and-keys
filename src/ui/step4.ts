@@ -81,16 +81,19 @@ export function mountStep4(): void {
       });
       return;
     }
-    state.signature = await sign(pair.signWith, state.message, pair.fingerprint);
+    const message = state.message;
+    const signature = await sign(pair.signWith, message, pair.fingerprint);
+    if (state.pair !== pair || state.message !== message) return;
+    state.signature = signature;
     // The checker starts with exactly what was signed. The reader may then edit
     // it, which is the honest shape of tampering: the signature is untouched and
     // the document moves underneath it.
     state.checkerText = state.message;
     checkerBox.value = state.message;
     checkerWrap.hidden = false;
-    await showSamePair();
     showSigned();
     settled();
+    await showSamePair();
   });
 
   checkerBox.addEventListener('input', () => {
@@ -126,6 +129,7 @@ async function showSamePair(): Promise<void> {
   const fromLocking = new Uint8Array(await crypto.subtle.exportKey('spki', pair.lockWith));
   const fromChecking = new Uint8Array(await crypto.subtle.exportKey('spki', pair.checkWith));
 
+  if (state.pair !== pair) return;
   if (!sameBytes(fromLocking, fromChecking)) {
     render('same-pair', {
       marker: 'same-pair',
@@ -251,9 +255,11 @@ async function runCheck(): Promise<void> {
   // no-op. See gates.ts for why that distinction cost a rewrite.
   if (!pair || !sig) return;
 
+  const draft = state.message;
   const given = state.checkerText ?? sig.over;
   const publicOnly = await importPublicForChecking(pair.publicKeyBytes);
   const result = await check(publicOnly, sig.bytes, given);
+  if (state.pair !== pair || state.signature !== sig || state.message !== draft || state.checkerText !== given) return;
 
   if (!result.ok) {
     render('checked', {

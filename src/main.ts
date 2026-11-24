@@ -47,7 +47,7 @@ function reportUnavailable(): void {
   const banner = document.getElementById('unavailable');
   if (banner) banner.hidden = false;
   for (const control of Array.from(
-    document.querySelectorAll<HTMLButtonElement>('button[data-needs]')
+    document.querySelectorAll<HTMLButtonElement>('#make-pair, button[data-needs]')
   )) {
     control.disabled = true;
   }

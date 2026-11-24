@@ -14,6 +14,7 @@
  * blocked, only offered.
  */
 import { byId } from './dom';
+import { NEEDS } from './gates';
 import { state } from './state';
 
 interface Hop {
@@ -34,7 +35,7 @@ const HOPS: readonly Hop[] = [
   },
   {
     host: 's2-next',
-    ready: () => state.locked !== null,
+    ready: NEEDS.lock.holds,
     href: '#step-3',
     label: 'Continue to Step 3 — open it, and find out what opening proves',
   },
@@ -48,7 +49,7 @@ const HOPS: readonly Hop[] = [
   },
   {
     host: 's4-next',
-    ready: () => state.signature !== null,
+    ready: NEEDS.signature.holds,
     href: '#recap',
     label: 'Finish — the recap, and three questions',
   },

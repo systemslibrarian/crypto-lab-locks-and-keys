@@ -1,6 +1,10 @@
 import { createHash } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { boot } from './gate';
+
+declare global {
+  interface Window { holdResult: () => Promise<void>; }
+}
 import { enforceLedger, ran, witness } from './evidence';
 
 /**
@@ -526,6 +530,34 @@ test.describe('a result always describes inputs that are still on screen', () =>
     await expect(page.locator('#step-4 .gate-note')).toBeHidden();
   });
 
+  test('a signature result cannot be applied to text edited during verification', async ({ page }) => {
+    await boot(page, 'dark');
+    await fullRun(page);
+    let finish!: () => void;
+    let started!: () => void;
+    const inFlight = new Promise<void>((resolve) => { started = resolve; });
+    const resume = new Promise<void>((resolve) => { finish = resolve; });
+    await page.exposeFunction('holdResult', () => { started(); return resume; });
+    await page.evaluate(() => {
+      const verify = SubtleCrypto.prototype.verify;
+      SubtleCrypto.prototype.verify = async function (...args) {
+        const answer = await verify.apply(this, args);
+        await window.holdResult();
+        setTimeout(() => document.documentElement.dataset.verificationReturned = 'yes', 0);
+        return answer;
+      };
+    });
+    await page.locator('#check-sig').click();
+    await inFlight;
+    await page.locator('#checker-text').fill('A new version the signer never saw.');
+    finish();
+    await expect(page.locator('html')).toHaveAttribute('data-verification-returned', 'yes');
+    await expect(page.locator('[data-verdict="checked"]')).toHaveCount(0);
+    // A second check returns a real refusal. No older positive result may reappear.
+    await page.locator('#check-sig').click();
+    await expect(page.locator('[data-verdict="checked"]')).toHaveAttribute('data-tone', 'held');
+  });
+
   test('editing the note supersedes every result that quoted it', async ({ page }) => {
     await boot(page, 'dark');
     await fullRun(page);
@@ -547,6 +579,8 @@ test.describe('a result always describes inputs that are still on screen', () =>
       signed: 'stale',
       checked: 'stale',
     });
+    await expect(page.locator('#open-lock')).toBeDisabled();
+    await expect(page.locator('#check-sig')).toBeDisabled();
     // The pair did not change, so the same-pair proof is still true.
     expect((await statusOf(page))['same-pair']).toBe('fresh');
 

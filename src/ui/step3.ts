@@ -81,7 +81,9 @@ export function mountStep3(): void {
     const pair = state.pair;
     const locked = state.locked;
     if (!pair || !locked) return;
+    const message = state.message;
     const result = await open(pair.openWith, locked.bytes);
+    if (state.pair !== pair || state.locked !== locked || state.message !== message || state.lockedOver !== message) return;
     if (!result.ok) {
       // Unreachable with a correct build: this is the reader's own pair opening
       // its own lock. It is rendered rather than swallowed so that a build in
@@ -95,6 +97,17 @@ export function mountStep3(): void {
           'Your own private key failed to open your own note. That should be impossible; ' +
             'something in this build is wrong.',
         ],
+      });
+      settled();
+      return;
+    }
+    if (result.value !== message) {
+      render('opened', {
+        marker: 'opened',
+        tone: 'alarm',
+        glyph: 'warn',
+        headline: 'OPENED TO A DIFFERENT NOTE',
+        detail: ['The recovered text differs from the note that was encrypted.'],
       });
       settled();
       return;
@@ -136,8 +149,10 @@ export function mountStep3(): void {
     try {
       // A genuinely fresh pair, generated now. Nothing is faked and no error is
       // simulated: WebCrypto is handed the wrong private key and asked to try.
-      state.otherPair = await makePair();
-      const result = await open(state.otherPair.openWith, locked.bytes);
+      const otherPair = await makePair();
+      const result = await open(otherPair.openWith, locked.bytes);
+      if (state.locked !== locked || state.lockedOver !== state.message) return;
+      state.otherPair = otherPair;
       if (result.ok) {
         // The one state on this page that earns an alarm: something that had to
         // fail did not.
@@ -196,8 +211,9 @@ export function mountStep3(): void {
       // The stranger is given the exported public bytes and nothing else. Not a
       // flag, not a mode — a separate imported key that can only encrypt.
       const strangerHandle = await importPublicForLocking(pair.publicKeyBytes);
-      state.fromStranger = await close(strangerHandle, state.strangerText);
-      const result = await open(pair.openWith, state.fromStranger.bytes);
+      const fromStranger = await close(strangerHandle, state.strangerText);
+      const result = await open(pair.openWith, fromStranger.bytes);
+      if (state.pair !== pair) return;
 
       if (!result.ok) {
         render('unattributed', {
@@ -213,6 +229,7 @@ export function mountStep3(): void {
         return;
       }
 
+      state.fromStranger = fromStranger;
       render(
         'unattributed',
         {
