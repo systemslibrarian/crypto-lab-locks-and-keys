@@ -806,7 +806,7 @@ test.describe('the signing-role question, kept and scoped', () => {
     // are normal practice, so the distractor must be wrong about this page
     // without being wrong about the world.
     await expect(result).toContainText('This demo generated exactly ONE pair');
-    await expect(result).toContainText('real systems often DO keep separate keys');
+    await expect(result).toContainText('Use independent keys for signing and encryption in a new system');
 
     await page.locator('#check-roles .check-opt').first().click();
     await expect(result).toHaveClass(/pill-ok/);
