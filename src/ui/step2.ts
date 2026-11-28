@@ -106,10 +106,9 @@ function showLocked(): void {
       ]),
       p(
         differs
-          ? 'The same note, encrypted twice, came out as completely different bytes — and ' +
-            'both of them decrypt to that same note. A fresh random value goes into every ' +
-            'encryption, so an eavesdropper who sees the same note sent twice cannot even ' +
-            'tell it was the same note.'
+          ? 'The same note produced two different ciphertext blocks. The browser draws a random ' +
+            'OAEP seed for each encryption. Seeing different blocks checks this observation ' +
+            'only. It does not measure the quality of the browser’s randomness.'
           : 'Both encryptions produced IDENTICAL bytes. A random seed can repeat, but it is ' +
             'extremely unlikely with a 32-byte seed. This run did not show different ciphertexts.',
         differs ? 'claim-note' : 'negative-claim'

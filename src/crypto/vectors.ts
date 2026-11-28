@@ -33,7 +33,7 @@
 export const VECTOR_SOURCE = {
   name: "Project Wycheproof",
   detail: "rsa_oaep_2048_sha256_mgf1sha256_test.json · rsa_pss_2048_sha256_mgf1_32_test.json",
-  url: "https://github.com/C2SP/wycheproof",
+  url: "https://github.com/C2SP/wycheproof/tree/65ca494727a52944c204441c860b039e6786b99b/testvectors_v1",
   /** What RFC 8017 is actually cited for: the schemes, not the numbers. */
   spec: "RFC 8017 §7.1 (RSAES-OAEP), §8.1 (RSASSA-PSS)",
 } as const;

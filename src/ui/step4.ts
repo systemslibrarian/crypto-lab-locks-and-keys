@@ -174,7 +174,8 @@ async function showSamePair(): Promise<void> {
         'Read those two boxes together and you have the idea: one pair, and the keys ' +
           'change jobs. Encrypting and signing are different operations — a signature is ' +
           'not a secret, and it is not encryption run backwards — but in RSA the same pair ' +
-          'can do both.',
+          'can do both. For a new system, use independent keys for signing and encryption. ' +
+          'That lets you revoke a signing key while retaining access to encrypted records.',
         'claim-note'
       ),
       disclosure('Show both exports side by side', [
@@ -224,9 +225,9 @@ function showSigned(): void {
         'claim-note'
       ),
       p(
-        'Press Sign again and the signature bytes will be completely different, and both ' +
-          'signatures will verify. A fresh random salt goes into every signature, just as a ' +
-          'fresh seed goes into every locked block.',
+        'Press Sign again to see another signature on the same note. The browser draws a ' +
+          'new salt for each RSA-PSS signature. Different outputs show that the bytes ' +
+          'changed. They cannot establish the quality of the random source.',
         'aside-note'
       ),
       disclosure('Show the whole signature', [

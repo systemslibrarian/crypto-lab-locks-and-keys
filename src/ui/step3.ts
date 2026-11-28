@@ -54,6 +54,11 @@ export const NEGATIVE_CLAIM =
   'can produce a block this private key opens, and the block carries no record ' +
   'of who made it.';
 
+function showUnavailable(marker: string, detail: string): void {
+  render(marker, { marker, tone: 'fail', glyph: 'warn', headline: 'CHECK UNAVAILABLE', detail: [detail] });
+  settled();
+}
+
 export function mountStep3(): void {
   const openedHost = document.getElementById('s3-out') as HTMLElement;
   const wrongHost = document.getElementById('s3-wrong-out') as HTMLElement;
@@ -84,6 +89,7 @@ export function mountStep3(): void {
     const message = state.message;
     const result = await open(pair.openWith, locked.bytes);
     if (state.pair !== pair || state.locked !== locked || state.message !== message || state.lockedOver !== message) return;
+    if (!result.ok && result.reason === 'unavailable') return showUnavailable('opened', result.refused);
     if (!result.ok) {
       // Unreachable with a correct build: this is the reader's own pair opening
       // its own lock. It is rendered rather than swallowed so that a build in
@@ -152,6 +158,7 @@ export function mountStep3(): void {
       const otherPair = await makePair();
       const result = await open(otherPair.openWith, locked.bytes);
       if (state.locked !== locked || state.lockedOver !== state.message) return;
+      if (!result.ok && result.reason === 'unavailable') return showUnavailable('wrong-key', result.refused);
       state.otherPair = otherPair;
       if (result.ok) {
         // The one state on this page that earns an alarm: something that had to
@@ -215,6 +222,7 @@ export function mountStep3(): void {
       const result = await open(pair.openWith, fromStranger.bytes);
       if (state.pair !== pair) return;
 
+      if (!result.ok && result.reason === 'unavailable') return showUnavailable('unattributed', result.refused);
       if (!result.ok) {
         render('unattributed', {
           marker: 'unattributed',

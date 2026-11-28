@@ -31,7 +31,7 @@ export function whyNotLockable(text: string): string | null {
  * the message length, so the ciphertext size leaks nothing about how much was
  * said. OAEP also mixes in a fresh random seed per call, so locking the same
  * message twice gives two different blocks — which is why Step 2 lets the reader
- * press the button again and watch the bytes change completely.
+ * press the button again and compare the two ciphertext blocks.
  */
 export async function close(lockWith: CryptoKey, text: string): Promise<Locked> {
   const refusal = whyNotLockable(text);
@@ -61,6 +61,7 @@ export async function open(openWith: CryptoKey, locked: Bytes): Promise<Attempt<
       new TextDecoder('utf-8', { fatal: true }).decode(
         await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, openWith, locked)
       ),
+    'The decryption check could not complete. Retry the operation.',
     'This key does not open that lock.'
   );
 }

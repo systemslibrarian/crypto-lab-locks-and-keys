@@ -69,4 +69,4 @@ export interface Locked {
  */
 export type Attempt<T> =
   | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly refused: string };
+  | { readonly ok: false; readonly reason: 'refused' | 'unavailable'; readonly refused: string };

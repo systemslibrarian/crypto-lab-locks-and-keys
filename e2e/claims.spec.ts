@@ -311,8 +311,25 @@ test.describe('each step verdict, read off the computed result', () => {
     expect(tight(second)).not.toBe(tight(first));
     // And the page states the comparison rather than leaving it to the eye.
     await expect(page.locator('#s2-out .claim-note').first()).toContainText(
-      'completely different bytes'
+      'two different ciphertext blocks'
     );
+  });
+
+  test('an unavailable decrypt operation supplies no wrong-key verdict', async ({ page }) => {
+    await boot(page, 'dark');
+    await page.locator('#make-pair').click();
+    await page.getByRole('button', { name: 'Encrypt the note' }).click();
+    await page.evaluate(() => {
+      const original = crypto.subtle.decrypt.bind(crypto.subtle);
+      Object.defineProperty(crypto.subtle, 'decrypt', { configurable: true, value: () => {
+        Object.defineProperty(crypto.subtle, 'decrypt', { configurable: true, value: original });
+        return Promise.reject(new TypeError('test provider unavailable'));
+      } });
+    });
+    await page.locator('#try-wrong-key').click();
+    await expect(page.locator('#s3-wrong-out .verdict-headline')).toHaveText('CHECK UNAVAILABLE');
+    await page.locator('#try-wrong-key').click();
+    await expect(page.locator('#s3-wrong-out .verdict-headline')).toHaveText('DID NOT OPEN');
   });
 
   test('Step 3 returns exactly the note that was typed', async ({ page }) => {

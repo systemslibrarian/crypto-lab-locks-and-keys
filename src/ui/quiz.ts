@@ -121,9 +121,9 @@ const QUESTIONS: readonly Question[] = [
         correct: false,
         because:
           'Not here. This demo generated exactly ONE pair, in Step 1, and the SAME PAIR box ' +
-          'above proves it by exporting the public key from both handles. Worth knowing, ' +
-          'though: real systems often DO keep separate keys for signing and encryption, on ' +
-          'purpose. That is a choice about key management, not something the maths requires.',
+          'above compares the public keys from both handles. Use independent keys for ' +
+          'signing and encryption in a new system. Each can then have its own access policy ' +
+          'and can be revoked separately. Sharing needs a security analysis of the exact schemes.',
       },
       {
         label: 'The public key signed; the private key verified',
@@ -142,8 +142,9 @@ const QUESTIONS: readonly Question[] = [
         label: 'The public key',
         correct: true,
         because:
-          'Right. They encrypt with your public key; only your private key opens the result. ' +
-          'You can send the public key over anything, even a channel somebody is reading.',
+          'Right. They encrypt with your public key. Someone reading the channel may see ' +
+          'the key. Your friend still needs to authenticate it, for example through a trusted ' +
+          'directory, to know that a different key was not substituted.',
       },
       {
         label: 'The private key',

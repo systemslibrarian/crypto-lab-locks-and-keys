@@ -17,7 +17,7 @@
  * Neither is a check against the publication; `vectors.test.ts` is. The split is
  * deliberate and both keys are needed.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { webcrypto } from 'node:crypto';
 import {
   MAX_MESSAGE_BYTES,
@@ -40,6 +40,23 @@ import { check, sign } from './sign';
 if (!globalThis.crypto?.subtle) {
   Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
 }
+
+it('distinguishes OAEP refusal, a provider failure and an unfinished PSS check', async () => {
+  const pair = await makePair();
+  const ciphertext = await close(pair.lockWith, 'hello');
+  const decrypt = vi.spyOn(crypto.subtle, 'decrypt');
+  const verify = vi.spyOn(crypto.subtle, 'verify');
+  try {
+    decrypt.mockRejectedValueOnce(new DOMException('invalid block', 'OperationError'));
+    expect(await open(pair.openWith, ciphertext.bytes)).toMatchObject({ ok: false, reason: 'refused' });
+    decrypt.mockRejectedValueOnce(new TypeError('provider unavailable'));
+    expect(await open(pair.openWith, ciphertext.bytes)).toMatchObject({ ok: false, reason: 'unavailable' });
+    verify.mockRejectedValueOnce(new DOMException('unavailable', 'OperationError'));
+    expect(await check(pair.checkWith, new Uint8Array(), 'hello')).toMatchObject({ ok: false, reason: 'unavailable' });
+  } finally {
+    vi.restoreAllMocks();
+  }
+});
 
 /** 2048-bit RSA keygen is slow and genuinely variable; four pairs is the budget. */
 const PAIRS = 4;

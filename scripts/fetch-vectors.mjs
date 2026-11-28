@@ -4,7 +4,7 @@
  *
  * Run: node scripts/fetch-vectors.mjs
  *
- * WHY THIS SCRIPT EXISTS, AND WHY IT IS NOT RUN IN CI.
+ * WHY THIS SCRIPT EXISTS.
  *
  * The lab's own correctness tests are round-trips and cross-pair rejections
  * over freshly generated key pairs — they check the lab against itself. That is
@@ -37,7 +37,8 @@
  */
 import { writeFileSync } from 'node:fs';
 
-const BASE = 'https://raw.githubusercontent.com/C2SP/wycheproof/main/testvectors_v1';
+const REVISION = '65ca494727a52944c204441c860b039e6786b99b';
+const BASE = `https://raw.githubusercontent.com/C2SP/wycheproof/${REVISION}/testvectors_v1`;
 
 /* The cases taken, and why each one is here. A pinned set is a set of choices,
  * so the reason is recorded beside the id rather than left to the diff. */
@@ -143,7 +144,7 @@ const body = `/*
 export const VECTOR_SOURCE = {
   name: ${lit('Project Wycheproof')},
   detail: ${lit(`${WANT.oaep.file} · ${WANT.pss.file}`)},
-  url: ${lit('https://github.com/C2SP/wycheproof')},
+  url: ${lit(`https://github.com/C2SP/wycheproof/tree/${REVISION}/testvectors_v1`)},
   /** What RFC 8017 is actually cited for: the schemes, not the numbers. */
   spec: ${lit('RFC 8017 §7.1 (RSAES-OAEP), §8.1 (RSASSA-PSS)')},
 } as const;

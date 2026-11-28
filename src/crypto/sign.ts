@@ -77,6 +77,6 @@ export async function check(
         signature,
         new TextEncoder().encode(text)
       ),
-    'That signature could not be checked at all — the key or the signature is unusable.'
+    'The signature check could not complete. Retry the operation.'
   );
 }

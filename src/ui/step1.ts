@@ -87,6 +87,7 @@ function showPair(): void {
       headline: 'A PAIR EXISTS',
       detail: [
         `Two related keys: one ${MODULUS_BITS}-bit RSA pair, generated in your browser.`,
+        'WebCrypto generates the primes using the platform’s random source. This lab checks how the key works. It cannot attest how the provider generated it.',
         `Pair label: ${pair.fingerprint}.`,
       ],
     },

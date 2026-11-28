@@ -80,7 +80,7 @@ Two things the lab is also explicit about in-page:
 2. **Step 2 — Encrypt a note to you.** Maya has your **public key** and nothing else. The
    result is one 256-byte block of nothing readable, and it is 256 bytes for any note short
    enough to fit — so the size of the block says nothing about the length of the note. Press it
-   twice and both blocks stay on screen side by side: completely different bytes, same note,
+   twice and both blocks stay on screen side by side. They normally differ for the same note,
    because a fresh random seed goes into every encryption. The panel states, beside the result,
    that the private key was not used and was not needed.
 3. **Step 3 — Open it.** The private key returns your note character for character. Then a
@@ -127,7 +127,9 @@ padding, and PSS verification does not decrypt a signature to recover a message 
 encoded block and checks its structure. "Running the pair backwards" describes the raw trapdoor,
 not either scheme, and a beginner who takes it literally ends up believing a signature is a
 secret in reverse. Other public-key families do not offer both jobs on one pair at all, and
-production systems routinely keep signing and encryption keys separate.
+[RFC 8017 §6](https://www.rfc-editor.org/rfc/rfc8017.html#section-6) recommends one
+scheme per RSA key pair for new applications. Independent keys allow separate revocation and
+access policies. Sharing requires analysis of the exact constructions and deployment.
 
 The insight the brief was reaching for survives — newcomers really do believe signing is a
 separate mechanism with its own keys — and the lab still proves the pair is the same one. Only
@@ -183,12 +185,14 @@ click away.
   chopping it into blocks is a classic and serious mistake. The answer is hybrid encryption.
 - **Deterministic padding.** Both schemes here are randomized on purpose — a fresh OAEP seed per
   block and a fresh PSS salt per signature. The unit suite asserts both, because a build in
-  which either became deterministic would look completely normal on screen.
+  which either became deterministic could still pass round-trip tests. Distinct outputs alone
+  cannot establish entropy quality. The lab trusts WebCrypto and the platform to generate keys,
+  OAEP seeds and PSS salts. It does not attest the provider’s generation process.
 
 ## Real-World Usage
 
 RSA-OAEP and RSA-PSS are specified in RFC 8017 (PKCS #1 v2.2) and are both widely deployed —
-RSA-PSS in TLS 1.3 certificate signatures, in modern code signing and in JOSE's `PS256`;
+RSA-PSS in TLS 1.3 handshake authentication (CertificateVerify), in modern code signing and in JOSE's `PS256`;
 RSA-OAEP in key transport in CMS, PKCS#11 tokens, JOSE's `RSA-OAEP-256` and smartcards. What is
 *not* common is the shape this lab demonstrates for teaching: encrypting application data
 directly to a public key. Real protocols use the public key to establish a symmetric key and
@@ -222,7 +226,7 @@ catalog's `tools/playwright-ports.json`.
 
 ## Build & Verify
 
-**31 unit tests** (4 files) + **29 claims tests** + **3 accessibility drives**.
+**32 unit tests** (4 files) + **30 claims tests** + **3 accessibility drives**.
 
 **Correctness, in two independent halves.** A freshly generated key pair has no published answer
 to compare against, so:

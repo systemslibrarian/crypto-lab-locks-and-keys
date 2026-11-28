@@ -15,7 +15,7 @@
  */
 import type { Attempt, Bytes, Pair } from './types';
 
-/** 2048 bits. Large enough to be real, small enough to generate while you watch. */
+/** The demo asks WebCrypto to generate an actual 2048-bit RSA pair. */
 export const MODULUS_BITS = 2048;
 
 /**
@@ -150,22 +150,21 @@ export async function importPublicForLocking(spki: Bytes): Promise<CryptoKey> {
 }
 
 /**
- * Wrap a rejected operation as a refusal rather than letting it throw.
- *
- * WebCrypto reports a wrong key, damaged padding and a bad signature the same
- * way — `decrypt` throws an `OperationError` carrying no detail, by design, so
- * that a decryption oracle cannot be built out of the error message. That
- * deliberate silence is itself worth teaching, so the refusal text the UI shows
- * is written here and says what is actually known, which is: it did not open, and
- * the construction will not say why.
+ * OAEP reports an undecipherable block with OperationError. An exception from
+ * a key handle, the runtime, or text decoding supplies no cryptographic verdict.
+ * PSS supplies its mismatch verdict as an ordinary false return value.
  */
 export async function attempt<T>(
   run: () => Promise<T>,
-  refusedWith: string
+  unavailable: string,
+  oaepRefusal?: string
 ): Promise<Attempt<T>> {
   try {
     return { ok: true, value: await run() };
-  } catch {
-    return { ok: false, refused: refusedWith };
+  } catch (error) {
+    if (oaepRefusal && error instanceof DOMException && error.name === 'OperationError') {
+      return { ok: false, reason: 'refused', refused: oaepRefusal };
+    }
+    return { ok: false, reason: 'unavailable', refused: unavailable };
   }
 }
